@@ -1,0 +1,71 @@
+.difficulty-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.difficulty-header {
+    font-size: 36px;
+    font-weight: bold;
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.difficulty-button-container {
+    display: flex;
+    justify-content: space-between; /* Space out the buttons horizontally */
+    gap: 20px; /* Optional: to create some space between buttons */
+    width: 80%; /* Updated: Control the width of the container for buttons */
+    flex-wrap: wrap;
+}
+
+.difficulty-title-button {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.difficulty-rules {
+    list-style-type: disc;
+    padding-left: 20px;
+    text-align: left;
+    margin-top: 10px;
+}
+
+.easy-mode-button,
+.normal-mode-button,
+.hard-mode-button,
+.impossible-mode-button {
+    display: inline-block;
+    outline: 0;
+    text-align: center;
+    cursor: pointer;
+    padding: 17px 30px;
+    border: 0;
+    color: #fff;
+    font-size: 17.5px;
+    border: 3px solid transparent;
+    border-color: #000;
+    color: #000;
+    background: transparent;
+    font-weight: 800;
+    line-height: 30px;
+    transition: background,color .1s ease-in-out;
+    margin: 0 20px;
+    height: 500px;
+    width: 250px;
+}
+
+.easy-mode-button:hover,
+.normal-mode-button:hover,
+.hard-mode-button:hover,
+.impossible-mode-button:hover {
+    background-color: #000;
+    color: #fff;
+}
