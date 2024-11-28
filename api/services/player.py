@@ -1,70 +1,114 @@
+from fastapi import HTTPException
+from sqlalchemy.future import select
+from sqlalchemy import update
+from api.services.db import sessionLocal, UsersTable, PlayerStatsTable
+from passlib.context import CryptContext
 
 
-# todo: move to SQLite
 class Player:
-    def __init__(self):
-        self.db = TinyDB('./db.json')
-        self.playerTable = self.db.table('player')
-        self.username = None
-        self.loggedIn = False
+    def __init__(self, username: str = None, password: str = None):
+        self.username = username
+        self.password = password
+        self.userId = None
+        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self.currentLevel = None
+        self.xpToNextLevel = None
+        self.currentXp = None
+        self.highestScore = None
+        self.gamesWon = None
+        self.gamesPlayed = None
+        self.winRate = None
 
-    def createPlayer(self):  # todo: post
-        while True:
-            username = input('Please enter your username: ')
-            existingUserCheck = self.playerTable.search(Query().user == username)
-            if existingUserCheck:
-                print('That user already exists! Please try another username or log in if that\'s your username.')
-                continue
-            elif username:
-                self.username = username
-                password = input('Please enter your password: ')
-                if password:
-                    self.playerTable.insert(
-                        {'user': username, 'password': password, 'currentLevel': 1, 'xpToNextLevel': 1000,
-                         'currentXP': 0, 'highestScore': 0, 'gamesWon': 0, 'gamesPlayed': 0, 'winRate': 0})
-                    self.loggedIn = True
-                    self.loadPlayerData()
-                    print('Thanks for joining! You are now logged in.')
-                    break
-                else:
-                    print('Please input a password!')
+    async def createPlayerProfile(self, username: str, password: str) -> str:
+        if not username or not password:
+            raise HTTPException(status_code=400, detail='Not a valid username or password.')
+
+        hashedPassword = self.pwd_context.hash(password)
+
+        async with sessionLocal() as session:
+            async with session.begin():
+
+                existingUser = await session.execute(select(UsersTable).where(UsersTable.username == username))
+                if existingUser.scalars().first():
+                    raise HTTPException(
+                        status_code=400,
+                        detail='That username already exists! Please try another username or log in.'
+                    )
+
+                newUser = UsersTable(username=username, password=hashedPassword)
+                session.add(newUser)
+                await session.flush()
+                await session.refresh(newUser)
+
+                self.userId = newUser.userId
+
+                newPlayer = PlayerStatsTable(userId=newUser.userId)
+                session.add(newPlayer)
+
+                await self.setPlayerData(self.userId)
+
+        return "Account created successfully. New UserId: " + newUser.userId
+
+    async def logPlayerIn(self, username: str, password: str) -> str:
+        async with sessionLocal() as session:
+            async with session.begin():
+                result = await session.execute(select(UsersTable).where(UsersTable.username == username))
+                user = result.scalars().first()
+
+                if not user or not await self.verifyPassword(password, user.password):
+                    raise HTTPException(status_code=400, detail='Invalid username or password.')
+
+                self.userId = user.userId
+
+                await self.setPlayerData(self.userId)
+
+                return "Login successful."
+
+    async def verifyPassword(self, plainPassword: str, hashedPassword: str) -> bool:
+        return self.pwd_context.verify(plainPassword, hashedPassword)
+
+    async def setPlayerData(self, userId: str):
+        async with sessionLocal() as session:
+            result = await session.execute(select(PlayerStatsTable).where(PlayerStatsTable.userId == userId))
+            playerStats = result.scalars().first()
+
+            if playerStats:
+                self.currentLevel = playerStats.currentLevel
+                self.xpToNextLevel = playerStats.xpToNextLevel
+                self.currentXp = playerStats.currentXp
+                self.highestScore = playerStats.highestScore
+                self.gamesWon = playerStats.gamesWon
+                self.gamesPlayed = playerStats.gamesPlayed
+                self.winRate = playerStats.winRate
             else:
-                print('Please input a username!')
+                raise HTTPException(status_code=404, detail="Player data not found.")
 
-    def logPlayerIn(self):  # todo: post?
-        if not self.playerTable:
-            self.createPlayer()
-        else:
-            while True:
-                username = input('Please enter your username: ')
-                if not self.playerTable.search(Query().user == username):
-                    print('That username doesn\'t exist. Please try again.')
-                    continue
-                password = input('Please enter your password: ')
-                if password == self.playerTable.search(Query().user == username)[0]['password']:
-                    self.username = username
-                    self.loggedIn = True
-                    self.loadPlayerData()
-                    print('You have successfully logged in.')
-                    break
-                else:
-                    print('Incorrect password. Please try again.')
-                    continue
+    async def updatePlayerData(self, userId):
+        if not userId:
+            raise HTTPException(status_code=400, detail='UserId required to update player data.')
 
-    def loadPlayerData(self):  # todo: get
-        try:
-            record = self.playerTable.get(Query().user == self.username)
-        except Exception:
-            logging.error('Error encountered getting player info.', exc_info=True)
-            raise
+        async with sessionLocal() as session:
+            async with session.begin():
+                result = await session.execute(select(PlayerStatsTable).where(PlayerStatsTable.userId == userId))
+                playerStats = result.scalars().first()
 
-        for key in ['highestScore', 'currentLevel', 'currentXP',
-                    'xpToNextLevel', 'gamesWon', 'gamesPlayed', 'winRate']:
-            setattr(self, key, record[key])
+                if not playerStats:
+                    raise HTTPException(status_code=404, detail="Player data not found.")
 
-    def updatePlayerData(self):  # TODO: PUT
-        record = {'highestScore': self.highestScore, 'currentLevel': self.currentLevel, 'currentXP': self.currentXP,
-                  'xpToNextLevel': self.xpToNextLevel, 'gamesWon': self.gamesWon, 'gamesPlayed': self.gamesPlayed,
-                  'gamesPlayed': self.gamesPlayed, 'winRate': self.winRate}
-        self.playerTable.upsert(record, Query().user == self.username)
+                updateRequest = (
+                    update(PlayerStatsTable)
+                    .where(PlayerStatsTable.userId == userId).values(
+                        currentLevel=self.currentLevel,
+                        xpToNextLevel=self.xpToNextLevel,
+                        currentXp=self.currentXp,
+                        highestScore=self.highestScore,
+                        gamesWon=self.gamesWon,
+                        gamesPlayed=self.gamesPlayed,
+                        winRate=self.winRate
+                    )
+                )
+                await session.execute(updateRequest)
+                await session.commit()
+
+            return "Player data updated successfully."
 

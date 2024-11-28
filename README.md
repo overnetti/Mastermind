@@ -40,9 +40,18 @@ player stats
 7. gamesPlayed
 8. winRate
 
-Multiplayer tables?
+Multiplayer tables? How?
 
+Must have tests for endpoints
+Must have logs
+
+Things I neglected along the way:
+JWT token/authorization
+Showing invalid password on react page 
+Logging
+Testing
 
 IF I HAVE TIME:
+
 Logs
 1. logID and all the recent logs

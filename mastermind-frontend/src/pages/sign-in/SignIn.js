@@ -7,11 +7,31 @@ const SignIn = () => {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
-    const handleSignIn = (e) => {
-        // Send data to API
-        // Handle sign in and authentication in API
-        console.log(username, password);
-        navigate("/difficulty-selector");  // Navigate to next page after form submission
+    const handleSignIn = async (e) => {
+        e.preventDefault();
+        if (!username || !password) {
+            alert('Username and password are required');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+                navigate("/difficulty-selector");
+            } else {
+                const errorDetail = await response.json();
+                console.error('Failed to login:', errorDetail.detail || 'Unknown error');
+            }
+        } catch (error) {
+            console.error('Error:', error.message);
+        }
     };
 
 
@@ -24,15 +44,15 @@ const SignIn = () => {
                     className="user-input-field"
                     placeholder="Username"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => setUsername(e.target.value.trim())}
                     required
                 />
                 <input
-                    type="text"
+                    type="password"
                     className="pw-input-field"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value.trim())}
                     required
                 />
                 <button className="sign-in-button" type="submit">Let's Play!</button>
