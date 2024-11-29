@@ -6,9 +6,8 @@ from passlib.context import CryptContext
 
 
 class Player:
-    def __init__(self, username: str = None, password: str = None):
-        self.username = username
-        self.password = password
+    def __init__(self):
+        self.username = None
         self.userId = None
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self.currentLevel = None
@@ -41,11 +40,12 @@ class Player:
                 await session.refresh(newUser)
 
                 self.userId = newUser.userId
+                self.username = username
 
                 newPlayer = PlayerStatsTable(userId=newUser.userId)
                 session.add(newPlayer)
 
-                await self.setPlayerData(self.userId)
+        await self.setPlayerData(self.userId)
 
         return "Account created successfully. New UserId: " + newUser.userId
 
@@ -59,6 +59,7 @@ class Player:
                     raise HTTPException(status_code=400, detail='Invalid username or password.')
 
                 self.userId = user.userId
+                self.username = username
 
                 await self.setPlayerData(self.userId)
 

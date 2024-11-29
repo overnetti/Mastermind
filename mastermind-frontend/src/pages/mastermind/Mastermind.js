@@ -6,17 +6,42 @@ const Mastermind = () => {
   const location = useLocation();
   const { difficulty } = location.state || { difficulty: "Unknown" };
   const [guess, setGuess] = useState("");
+  const [correctNumbers, setCorrectNumbers] = useState(0);
+  const [correctPositions, setCorrectPositions] = useState(0);
+  const [remainingGuesses, setRemainingGuesses] = useState(null);
 
   const rules = {
-      EASY: ["Rule 1", "Rule 2"],
-      NORMAL: ["Rule 3", "Rule 4"],
-      HARD: ["Rule 5", "Rule 6"],
-      IMPOSSIBLE: ["Rule 7", "Rule 8"],
+      EASY: ["10 guesses", "4 digits", "Digits between 0 and 5"],
+      NORMAL: ["10 guesses", "4 digits", "Digits between 0 and 7"],
+      HARD: ["10 guesses", "6 digits", "Digits between 0 and 9"],
+      IMPOSSIBLE: ["5 guesses", "10 digits", "Digits between 0 and 9"],
   }
 
-  const handleGuess = () => {
-    // API call
-    setGuess("");
+  const handleGuess = async () => {
+      try {
+          const response = await fetch('http://127.0.0.1:5000/submit-guess', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ guess: guess }),
+          });
+
+          if (!response.ok) {
+              throw new Error(`Failed to submit guess: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          console.log(result);
+
+          setCorrectNumbers(result.correctNumbers);
+          setCorrectPositions(result.correctPositions);
+          setRemainingGuesses(result.remainingGuesses);
+          // navigate("/mastermind", { state: { difficulty: mode } });
+      } catch (error) {
+          console.error('Error submitting guess:', error.message);
+          alert('Failed to submit guess, please try again.');
+      }
   };
 
   return (
@@ -30,7 +55,7 @@ const Mastermind = () => {
           </ul>
       </div>
         <h2 className="combination-header">Guess the Combination!</h2>
-        <h4 className="game-text">X correct numbers and Y correct positions</h4>
+        <h4 className="game-text">{correctNumbers} correct numbers and {correctPositions} correct positions</h4>
         <input
             type="text"
             value={guess}
@@ -39,7 +64,9 @@ const Mastermind = () => {
             className="guess-input"
         />
         <button className="guess-button" onClick={handleGuess}>Guess</button>
-        <h4 className="game-text">Z guesses remaining</h4>
+        {remainingGuesses !== null && (
+            <h4 className="game-text">{remainingGuesses} guesses remaining</h4>
+        )}
     </div>
   );
 };

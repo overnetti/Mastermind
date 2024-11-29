@@ -27,6 +27,7 @@ const CreateAccount = () => {
               },
               body: JSON.stringify({ username, password }),
           });
+          console.log(response);
 
           if (response.ok) {
               navigate("/difficulty-selector");

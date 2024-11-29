@@ -45,13 +45,11 @@ Multiplayer tables? How?
 Must have tests for endpoints
 Must have logs
 
-Things I neglected along the way:
-JWT token/authorization
-Showing invalid password on react page 
-Logging
-Testing
+Frontend stuff I have to do:
+- Let user know if they have an invalid password/username combo
+- Dynamically display rounds left etc. when entering game (API call returns this data)
+- Dynamically display rounds left when continuing game
+- Dynamically alert on frontend of insufficient values for guess 
 
 IF I HAVE TIME:
-
-Logs
-1. logID and all the recent logs
+- Pw auth

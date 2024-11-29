@@ -5,10 +5,26 @@ import './DifficultyMode.css';
 const Difficulty = () => {
   const navigate = useNavigate();
 
-  const handleDifficultySelection = (mode) => {
-    // Set the difficulty mode in the API based on input
-    navigate("/mastermind", { state: { difficulty: mode } });
-  }
+  const handleDifficultySelection = async (mode) => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/enter-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ difficulty: mode }),
+      });
+
+        if (!response.ok) {
+          throw new Error(`Failed to set difficulty mode: ${response.statusText}`);
+        }
+
+        navigate("/mastermind", { state: { difficulty: mode } });
+    } catch (error) {
+      console.error('Error setting difficulty:', error.message);
+      alert('Failed to set difficulty mode, please try again.');
+    }
+  };
 
   return (
     <div className="difficulty-container">
@@ -21,7 +37,9 @@ const Difficulty = () => {
         >
           <span className="difficulty-title-button">Easy</span>
           <ul className="difficulty-rules">
-            <li>Rule 1</li>
+            <li>10 guesses</li>
+            <li>4 digits</li>
+            <li>Digits between 0 and 5</li>
           </ul>
         </button>
 
@@ -32,7 +50,9 @@ const Difficulty = () => {
         >
           <span className="difficulty-title-button">Normal</span>
           <ul className="difficulty-rules">
-            <li>Rule 1</li>
+            <li>10 guesses</li>
+            <li>4 digits</li>
+            <li>Digits between 0 and 7</li>
           </ul>
         </button>
 
@@ -43,7 +63,9 @@ const Difficulty = () => {
         >
           <span className="difficulty-title-button">Hard</span>
           <ul className="difficulty-rules">
-            <li>Rule 1</li>
+            <li>10 guesses</li>
+            <li>6 digits</li>
+            <li>Digits between 0 and 9</li>
           </ul>
         </button>
 
@@ -54,7 +76,9 @@ const Difficulty = () => {
         >
           <span className="difficulty-title-button">Impossible</span>
           <ul className="difficulty-rules">
-            <li>Rule 1</li>
+            <li>5 guesses</li>
+            <li>10 digits</li>
+            <li>Digits between 0 and 9</li>
           </ul>
         </button>
       </div>

@@ -5,6 +5,7 @@ ROUND_SCORE = 0
 MIN_RAND_DIGIT = 0
 INPUT_TIMER = 30
 TOTAL_ROUNDS = 10
+BASE_SCORE = 100
 ROUND_MULTIPLIER = {
     1: 2,
     2: 1.9,
@@ -23,20 +24,21 @@ difficulty_modes = {
     "EASY": {
         "GUESS_COUNT": 10,
         "INPUT_LEN": 4,
+        "TOTAL_ROUNDS": 10,
         "MAX_RAND_DIGIT": 5,
-        "BASE_SCORE": 100,  # todo: should this be a static?
         "MULTIPLIER": 0.5
     },
     "NORMAL": {
         "GUESS_COUNT": 10,
         "INPUT_LEN": 4,
+        "TOTAL_ROUNDS": 10,
         "MAX_RAND_DIGIT": 7,
-        "BASE_SCORE": 100,  # todo: should this be a static?
         "MULTIPLIER": 1
     },
     "HARD": {
         "GUESS_COUNT": 10,
         "INPUT_LEN": 6,
+        "TOTAL_ROUNDS": 10,
         "MAX_RAND_DIGIT": 9,
         "MULTIPLIER": 2
     },
