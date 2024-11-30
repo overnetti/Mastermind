@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.future import select
 from sqlalchemy import update
 from api.services.db import sessionLocal, UsersTable, PlayerStatsTable
@@ -102,14 +103,41 @@ class Player:
                         currentLevel=self.currentLevel,
                         xpToNextLevel=self.xpToNextLevel,
                         currentXp=self.currentXp,
-                        highestScore=self.highestScore,
-                        gamesWon=self.gamesWon,
-                        gamesPlayed=self.gamesPlayed,
-                        winRate=self.winRate
+                        highestScore=self.highestScore,  # updated this
+                        gamesWon=self.gamesWon,  # updated this
+                        gamesPlayed=self.gamesPlayed,  # updated this
+                        winRate=self.winRate  # updated this
                     )
                 )
                 await session.execute(updateRequest)
                 await session.commit()
 
             return "Player data updated successfully."
+
+    async def getPlayerData(self, userId):
+        if not userId:
+            raise HTTPException(status_code=400, detail="UserId is required to retrieve player stats.")
+
+        async with sessionLocal() as session:
+            async with session.begin():
+                result = await session.execute(select(PlayerStatsTable).where(PlayerStatsTable.userId == userId))
+                playerStats = result.scalars().first()
+
+                if not playerStats:
+                    raise HTTPException(status_code=400, detail="Player data was not found.")
+
+                return JSONResponse(content={
+                    "userId": playerStats.userId,
+                    "currentLevel": playerStats.currentLevel,
+                    "xpToNextLevel": playerStats.xpToNextLevel,
+                    "currentXp": playerStats.currentXp,
+                    "highestScore": playerStats.highestScore,
+                    "gamesWon": playerStats.gamesWon,
+                    "gamesPlayed": playerStats.gamesPlayed,
+                    "winRate": playerStats.winRate
+                })
+
+    def resetPlayer(self):
+        self.__init__()
+
 

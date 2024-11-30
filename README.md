@@ -47,9 +47,19 @@ Must have logs
 
 Frontend stuff I have to do:
 - Let user know if they have an invalid password/username combo
-- Dynamically display rounds left etc. when entering game (API call returns this data)
-- Dynamically display rounds left when continuing game
-- Dynamically alert on frontend of insufficient values for guess 
+- Dynamically alert on frontend of insufficient values for guess
+- Dynamic error messages
+
+Backend stuff:
+- Dynamic error messages
+- Make sure people cant create same username in backend (case sensitivity)
+- What happens if I try to submit a guess after winning? -- just lock the submission on frontend.
+- Check for userId on each round.
+- Clean logic code
+- Adjust what should be async and what shouldnt (db updates yes, otherwise not needed)
+- when a user navigates away, or the user exits (add exit button)
+  - the data in the player class and mastermind class needs to be reset for a clean slate.
+  - update endpoint to reset these...
 
 IF I HAVE TIME:
 - Pw auth

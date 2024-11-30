@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import './Mastermind.css';
 
 const Mastermind = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { difficulty } = location.state || { difficulty: "Unknown" };
   const [guess, setGuess] = useState("");
   const [correctNumbers, setCorrectNumbers] = useState(0);
@@ -32,12 +33,17 @@ const Mastermind = () => {
           }
 
           const result = await response.json();
-          console.log(result);
 
-          setCorrectNumbers(result.correctNumbers);
-          setCorrectPositions(result.correctPositions);
-          setRemainingGuesses(result.remainingGuesses);
-          // navigate("/mastermind", { state: { difficulty: mode } });
+          console.log('RESULT:', result);
+
+          if (result.status === "won" || result.status === "lost") {
+              navigate("/game-over", { state: { userId: result.userId, status: result.status } });
+          } else {
+              setCorrectNumbers(result.correctNumbers);
+              setCorrectPositions(result.correctPositions);
+              setRemainingGuesses(result.remainingGuesses);
+          }
+
       } catch (error) {
           console.error('Error submitting guess:', error.message);
           alert('Failed to submit guess, please try again.');

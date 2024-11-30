@@ -65,5 +65,10 @@ class GameUtils:
         return round(currentScore * config.ROUND_MULTIPLIER[currentRound])
 
     @staticmethod
-    def scoring(currentScore, difficultyMultiplier, roundMultiplier, roundCounter):
-        return difficultyMultiplier(currentScore) + roundMultiplier(currentScore, roundCounter)
+    def difficultyMultiplier(score, multiplier):
+        return round(score * multiplier)
+
+    @staticmethod
+    def scoring(currentScore, difficultyMultiplier, roundCounter):
+        return (GameUtils.difficultyMultiplier(currentScore, difficultyMultiplier)
+                + GameUtils.roundMultiplier(currentScore, roundCounter))

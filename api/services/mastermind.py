@@ -1,10 +1,13 @@
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.future import select
 from sqlalchemy import update
 from api.config import config
 from api.utils import game_utils
 from api.services.db import sessionLocal, UsersTable, PlayerStatsTable
 from api.services.player import Player
+import logging
+import traceback
 
 
 class Mastermind:
@@ -20,6 +23,8 @@ class Mastermind:
         self.multiplier = None
         self.baseScore = config.BASE_SCORE
         self.winningCombo = None
+        self.status = None
+        self.gameScore = 0
 
     async def enterGame(self, difficulty):
         await self.setDifficulty(difficulty)
@@ -50,85 +55,72 @@ class Mastermind:
                                                       self.minRandomDigit, self.maxRandomDigit):
                 raise ValueError({"ERROR": "Guess does not meet requirements."})
 
+            self.roundCounter += 1
+            self.remainingGuesses -= 1
+            isLastRound = self.roundCounter == self.totalRounds
+
             try:
-                isLastRound = self.roundCounter == self.totalRounds
                 numOfMatching = game_utils.GameUtils.matchingNumbers(guess, self.winningCombo)
                 numOfIndices = game_utils.GameUtils.matchingIndices(guess, self.winningCombo)
 
                 if numOfMatching == self.inputLength and numOfIndices == self.inputLength:
-                    # self.win()
-                    return {
-                        "status": "win",
-                        "correctNumbers": numOfMatching,
-                        "correctPositions": numOfIndices,
-                        "isLastRound": isLastRound,
-                    }
-                elif (numOfMatching == 0 and numOfIndices == 0) or (numOfMatching > 0 or numOfIndices > 0):
-                    self.roundCounter += 1
-                    self.remainingGuesses -= 1
-                    return {
-                        "status": "stillPlaying",
-                        "correctNumbers": numOfMatching,
-                        "correctPositions": numOfIndices,
-                        "isLastRound": isLastRound,
-                        "remainingGuesses": self.remainingGuesses
-                    }
+                    # self.remainingGuesses = 0
+                    await self.handleWin()
+                elif isLastRound:
+                    await self.handleGameOver()
+                else:
+                    self.status = "stillPlaying"
 
             except Exception as e:
+                logging.error(f"Error with submitting guess: {traceback.format_exc()}")
                 raise HTTPException(status_code=400, detail=str(e))
 
+            return JSONResponse(content={
+                "userId": self.player.userId,
+                "status": self.status,
+                "correctNumbers": numOfMatching,
+                "correctPositions": numOfIndices,
+                "currentRound": self.roundCounter,  # Remove this
+                "totalRounds": self.totalRounds,  # remove this
+                "isLastRound": isLastRound,
+                "remainingGuesses": self.remainingGuesses,
+                "winnerNumber": self.winningCombo  # REMOVE THIS
+            })
+
     async def handleGameOver(self):
-        pass
+        self.gameScore = self.baseScore
+        self.updateUniversalGameStats()
+        await self.player.updatePlayerData(self.player.userId)
+        self.resetGame()
+        self.status = "lost"
 
-    async def win(self):
-        pass
+    async def handleWin(self):
+        self.gameScore += game_utils.GameUtils.scoring(self.baseScore, self.multiplier, self.roundCounter)
+        self.player.gamesWon += 1
+        self.handleLeveling(self.gameScore)
+        self.updateUniversalGameStats()
+        await self.player.updatePlayerData(self.player.userId)
+        self.resetGame()
+        self.status = "won"
 
-    # def win(self):
-    #     self.currentScore += self.baseScore
-    #     self.roundScore += self.scoring(self.currentScore)
-    #     self.handleLeveling(self.roundScore)
-    #     self.player.highestScore = max(self.player.highestScore, self.scoring(self.roundScore))
-    #     self.player.gamesWon += 1
-    #     self.player.winRate = round((self.player.gamesWon / self.player.gamesPlayed) * 100)
-    #     print(f'Congratulations, you have guessed the combination! Your score is: {self.roundScore}')
-    #     print(f'Your current XP is {self.player.currentXP}/{self.player.xpToNextLevel}\n')
-    #     print(f'Your current win rate is: {self.player.winRate}%\n')
-    #     logging.info(
-    #         f'Computer response: Congratulations, you have guessed the combination! Your score is: {self.roundScore}')
-    #     logging.info(f'Your current XP is {self.player.currentXP}/{self.player.xpToNextLevel}\n')
-    #     logging.info(f'Your current win rate is: {self.player.winRate}%\n')
-    #     if self.player.highestScore >= self.roundScore:
-    #         print(f'Wow! You\'ve set a new high score: {self.player.highestScore}')
-    #         logging.info(f'Computer response: Wow! You\'ve set a new high score: {self.player.highestScore}')
-    #     self.player.updatePlayerData()
-    #     self.handlePlayAgain()
-    #
-    # def handleTimeout(self):  # todo: maybe get rid of
-    #     self.player.updatePlayerData()
-    #
-    # def handlePlayAgain(self):
-    #     while True:
-    #         userInput = input('Would you like to play again? (y/n): ')
-    #         if userInput == 'y':
-    #             self.player.gamesPlayed += 1
-    #             self.__init__(self.player)
-    #             self.playGame()
-    #             break
-    #         else:
-    #             print('Thanks for playing!')
-    #             break
-    #
-    # def handleLeveling(self, roundScore):
-    #     if self.player.currentXP + roundScore < self.player.xpToNextLevel:
-    #         self.player.currentXP += roundScore
-    #
-    #     elif self.player.currentXP + roundScore >= self.player.xpToNextLevel:
-    #         remainderXP = self.player.xpToNextLevel - self.player.currentXP
-    #         self.player.currentXP += remainderXP
-    #         if self.player.currentXP == self.player.xpToNextLevel:
-    #             self.player.currentLevel += 1
-    #             print(f'Congratulations! You are now Level {self.player.currentLevel}')
-    #             logging.info(f'Computer response: Congratulations! You are now Level {self.player.currentLevel}')
-    #             self.player.xpToNextLevel = self.player.xpToNextLevel * 1.5
-    #             self.player.currentXP = 0
-    #             self.player.currentXP = roundScore - remainderXP
+    def handleLeveling(self, gameScore):
+        totalXp = self.player.currentXp + gameScore
+
+        if totalXp < self.player.xpToNextLevel:
+            self.player.currentXp = totalXp
+        else:
+            while totalXp >= self.player.xpToNextLevel:
+                totalXp -= self.player.xpToNextLevel
+                self.player.currentLevel += 1
+                self.player.xpToNextLevel *= 1.5
+
+            self.player.currentXp = totalXp
+
+    def updateUniversalGameStats(self):
+        self.handleLeveling(self.gameScore)
+        self.player.gamesPlayed += 1
+        self.player.winRate = round((self.player.gamesWon / self.player.gamesPlayed) * 100)
+        self.player.highestScore = max(self.player.highestScore, self.gameScore)
+
+    def resetGame(self):
+        self.__init__(self.player)

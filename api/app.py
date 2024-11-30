@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from api.services.db import initDB
 from services.player import Player
 from services.mastermind import Mastermind
+import logging
 import traceback  # REMOVE THIS LATER
 import json
 
@@ -41,6 +42,7 @@ class PlayerStats(BaseModel):
 class DifficultyRequest(BaseModel):
     difficulty: str
 
+
 class GuessRequest(BaseModel):
     guess: str
 
@@ -51,6 +53,7 @@ async def createUser(user: Users) -> str:
         response = await player.createPlayerProfile(user.username, user.password)
         return response
     except Exception as e:
+        logging.error(f"Error fetching player data: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -60,6 +63,7 @@ async def login(user: Users) -> str:
         response = await player.logPlayerIn(user.username, user.password)
         return response
     except Exception as e:
+        logging.error(f"Error fetching player data: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -69,6 +73,7 @@ async def updatePlayerData(stats: PlayerStats) -> str:
         response = await player.updatePlayerData(stats)
         return response
     except Exception as e:
+        logging.error(f"Error fetching player data: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -78,6 +83,7 @@ async def enterGame(difficulty: DifficultyRequest) -> str:
         response = await game.enterGame(difficulty.difficulty)
         return json.dumps(response)
     except Exception as e:
+        logging.error(f"Error fetching player data: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -85,9 +91,31 @@ async def enterGame(difficulty: DifficultyRequest) -> str:
 async def submitGuess(guess: GuessRequest) -> str:
     try:
         response = await game.submitGuess(guess.guess)
-        return json.dumps(response)
+        return response
     except Exception as e:
+        logging.error(f"Error with submitting guess: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/get-player-stats")
+async def getPlayerStats(userId: str = Query(...)) -> dict:
+    try:
+        response = await player.getPlayerData(userId)
+        return response
+    except Exception as e:
+        logging.error(f"Error fetching player data: {traceback.format_exc()}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/reset")
+async def resetGameAndPlayer() -> str:
+    try:
+        game.resetGame()
+        player.resetPlayer()
+        return "Game and player have reset."
+    except Exception as e:
+        logging.error(f"Error fetching player data: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
