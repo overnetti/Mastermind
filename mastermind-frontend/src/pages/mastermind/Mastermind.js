@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import './Mastermind.css';
 
@@ -17,6 +17,33 @@ const Mastermind = () => {
       HARD: ["10 guesses", "6 digits", "Digits between 0 and 9"],
       IMPOSSIBLE: ["5 guesses", "10 digits", "Digits between 0 and 9"],
   }
+
+  const resetGame = async () => {
+      try {
+          await fetch("http://127.0.0.1:5000/reset", {
+              method: "POST",
+          });
+          console.log("Game and Player reset successfully.");
+          navigate("/");
+      } catch (error) {
+          console.error("Error resetting instances:", error.message);
+      }
+  };
+
+  useEffect(() => {
+      const handleBeforeUnload = (event) => {
+          resetGame();
+
+          event.preventDefault();
+          event.returnValue="";
+      };
+
+      window.addEventListener("beforeunload", handleBeforeUnload);
+
+      return () => {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+  }, []);
 
   const handleGuess = async () => {
       try {

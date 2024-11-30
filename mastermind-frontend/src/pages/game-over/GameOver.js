@@ -45,7 +45,7 @@ const GameOver = () => {
                 <ul className="player-stats">
                     <li>You're level {playerData.currentLevel}</li>
                     <li>Your experience is {Math.round(playerData.currentXp)}/{Math.round(playerData.xpToNextLevel)}</li>
-                    <li>Your highest score is {playerData.highestScore} (so far)</li>
+                    <li>Your highest score is {playerData.highestScore}</li>
                     <li>You've won {playerData.gamesWon} games</li>
                     <li>You win {playerData.winRate}% of the time</li>
                 </ul>

@@ -64,7 +64,6 @@ class Mastermind:
                 numOfIndices = game_utils.GameUtils.matchingIndices(guess, self.winningCombo)
 
                 if numOfMatching == self.inputLength and numOfIndices == self.inputLength:
-                    # self.remainingGuesses = 0
                     await self.handleWin()
                 elif isLastRound:
                     await self.handleGameOver()
