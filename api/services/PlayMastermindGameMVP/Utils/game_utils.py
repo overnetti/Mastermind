@@ -1,5 +1,4 @@
 from api.services.PlayMastermindGameMVP.Configs import MastermindGameMVPConfigs
-import threading
 import logging
 import requests
 import collections
