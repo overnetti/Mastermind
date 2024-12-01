@@ -10,6 +10,7 @@ const Mastermind = () => {
   const [correctNumbers, setCorrectNumbers] = useState(0);
   const [correctPositions, setCorrectPositions] = useState(0);
   const [remainingGuesses, setRemainingGuesses] = useState(null);
+  const [guessHistory, setGuessHistory] = useState([]);
 
   const rules = {
       EASY: ["10 guesses", "4 digits", "Digits between 0 and 5"],
@@ -69,6 +70,16 @@ const Mastermind = () => {
               setCorrectNumbers(result.correctNumbers);
               setCorrectPositions(result.correctPositionsAndNumbers);
               setRemainingGuesses(result.remainingGuesses);
+
+              setGuessHistory((prevHistory) => [
+                  ...prevHistory,
+                  {
+                      roundNumber: prevHistory.length + 1,
+                      guess: result.guess,
+                      correctNumbers: result.correctNumbers,
+                      correctPositions: result.correctPositionsAndNumbers,
+                  }
+              ]);
           }
 
       } catch (error) {
@@ -100,6 +111,19 @@ const Mastermind = () => {
         {remainingGuesses !== null && (
             <h4 className="game-text">{remainingGuesses} guesses remaining</h4>
         )}
+
+        {guessHistory.length > 0 && (
+        <div className="guess-history">
+            <h3 className="guess-hist-header">Guess History:</h3>
+            <ul className="guess-hist-list">
+                {guessHistory.map((entry, index) => (
+                    <li key={index}>
+                        Round {entry.roundNumber}, Guess: {entry.guess}, Hint: {entry.correctNumbers} correct numbers, {entry.correctPositions} correct positions
+                    </li>
+                ))}
+            </ul>
+        </div>
+            )}
     </div>
   );
 };

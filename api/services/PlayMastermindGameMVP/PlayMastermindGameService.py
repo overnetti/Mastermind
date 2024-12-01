@@ -74,6 +74,7 @@ class Mastermind:
                 "status": self.status,
                 "correctNumbers": str(numOfCorrectNums),
                 "correctPositionsAndNumbers": str(numOfCorrectPositionsAndNums),
+                "guess": guess,
                 "currentRound": self.roundCounter,  # Remove this
                 "totalRounds": self.totalRounds,  # remove this
                 "isLastRound": isLastRound,
