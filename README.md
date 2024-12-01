@@ -63,3 +63,6 @@ Backend stuff:
 
 IF I HAVE TIME:
 - Pw auth
+
+TODO:
+- Implement feature flag check and dynamically adjust frontend accordingly

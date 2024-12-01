@@ -1,16 +1,20 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from api.services.db import initDB
-from services.player import Player
-from services.mastermind import Mastermind
+from api.database.schema.DatabaseSchema import initDB
+from api.features.PlayerData.Services.CreateNewPlayer.CreateNewPlayerService import CreateNewPlayerService
+from api.features.PlayerData.Services.PlayerDataManagement.PlayerDataManagementService import PlayerDataManagementService
+from api.features.PlayerData.Services.PlayerLogin.PlayerLoginService import PlayerLoginService
+from api.features.PlayerStats.Services.PlayerStatsManagementService import PlayerStatsManagementService
+from api.services.PlayMastermindGameMVP.PlayMastermindGameService import Mastermind
 import logging
-import traceback  # REMOVE THIS LATER
+import traceback
 import json
 
 
 app = FastAPI()
-player = Player()
+player = PlayerDataManagementService()
 game = Mastermind(player)
 
 # Allows API to be queried by frontend
@@ -28,7 +32,7 @@ async def startup():
     await initDB()
 
 
-# User schema for FastAPI
+# Todo: Move these to their own schema file
 class Users(BaseModel):
     username: str
     password: str
@@ -39,8 +43,8 @@ class PlayerStats(BaseModel):
     userId: str
 
 
-class DifficultyRequest(BaseModel):
-    difficulty: str
+class ModeRequest(BaseModel):
+    mode: str
 
 
 class GuessRequest(BaseModel):
@@ -48,9 +52,10 @@ class GuessRequest(BaseModel):
 
 
 @app.post("/create-user")
-async def createUser(user: Users) -> str:
+async def createUser(user: Users) -> JSONResponse:
     try:
-        response = await player.createPlayerProfile(user.username, user.password)
+        createNewPlayerService = CreateNewPlayerService(player)
+        response = await createNewPlayerService.createNewPlayer(user.username, user.password)
         return response
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
@@ -58,9 +63,10 @@ async def createUser(user: Users) -> str:
 
 
 @app.post("/login")
-async def login(user: Users) -> str:
+async def login(user: Users) -> JSONResponse:
     try:
-        response = await player.logPlayerIn(user.username, user.password)
+        playerLoginService = PlayerLoginService(player)
+        response = await playerLoginService.logPlayerIn(user.username, user.password)
         return response
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
@@ -68,9 +74,10 @@ async def login(user: Users) -> str:
 
 
 @app.put("/update-player-stats")
-async def updatePlayerData(stats: PlayerStats) -> str:
+async def updatePlayerData(stats: PlayerStats) -> JSONResponse:
     try:
-        response = await player.updatePlayerData(stats)
+        playerStatsService = PlayerStatsManagementService(player)
+        response = await playerStatsService.updatePlayerStats(stats)
         return response
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
@@ -78,9 +85,9 @@ async def updatePlayerData(stats: PlayerStats) -> str:
 
 
 @app.post("/enter-game")
-async def enterGame(difficulty: DifficultyRequest) -> str:
+async def enterGame(mode: ModeRequest) -> str:
     try:
-        response = await game.enterGame(difficulty.difficulty)
+        response = await game.enterGame(mode.mode)
         return json.dumps(response)
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
@@ -98,9 +105,10 @@ async def submitGuess(guess: GuessRequest) -> str:
 
 
 @app.get("/get-player-stats")
-async def getPlayerStats(userId: str = Query(...)) -> dict:
+async def getPlayerStats(userId: str = Query(...)) -> JSONResponse:
     try:
-        response = await player.getPlayerData(userId)
+        playerStatsService = PlayerStatsManagementService(player)
+        response = await playerStatsService.getPlayerStats(userId)
         return response
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
@@ -111,7 +119,7 @@ async def getPlayerStats(userId: str = Query(...)) -> dict:
 async def resetGameAndPlayer() -> str:
     try:
         game.resetGame()
-        player.resetPlayer()
+        player.resetPlayerData()
         return "Game and player have reset."
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")

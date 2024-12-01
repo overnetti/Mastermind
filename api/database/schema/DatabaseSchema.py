@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import Column, String, Text, Integer
+from sqlalchemy import Column, String, Text, Integer, Boolean
 import uuid
 from datetime import datetime
 
@@ -32,7 +32,15 @@ class PlayerStatsTable(Base):
     winRate = Column(Integer, default=0.0)
 
 
-# Creates tables if they don't already exist
+class FeatureFlag(Base):
+    __tablename__="FeatureFlags"
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String)
+    isActive = Column(Boolean, default=0)
+    createdDate = Column(String, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    description = Column(String)
+
+
 async def initDB():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

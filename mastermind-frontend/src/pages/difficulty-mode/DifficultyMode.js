@@ -12,7 +12,7 @@ const Difficulty = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ difficulty: mode }),
+        body: JSON.stringify({ mode: mode }),
       });
 
         if (!response.ok) {

@@ -67,7 +67,7 @@ const Mastermind = () => {
               navigate("/game-over", { state: { userId: result.userId, status: result.status } });
           } else {
               setCorrectNumbers(result.correctNumbers);
-              setCorrectPositions(result.correctPositions);
+              setCorrectPositions(result.correctPositionsAndNumbers);
               setRemainingGuesses(result.remainingGuesses);
           }
 

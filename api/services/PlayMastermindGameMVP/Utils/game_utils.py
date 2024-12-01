@@ -1,31 +1,14 @@
-from api.config import config
+from api.services.PlayMastermindGameMVP.Configs import MastermindGameMVPConfigs
 import threading
 import logging
 import requests
+import collections
 
 
 class GameUtils:
-
-    # todo: maybe get rid of
-    @staticmethod
-    def inputWithTimeout(prompt, timeout):
-        print(prompt, end='', flush=True)
-        result = [None]
-        timerEvent = threading.Event()
-
-        def getInput():
-            result[0] = input()
-            timerEvent.set()
-
-        inputThread = threading.Thread(target=getInput)
-        inputThread.start()
-        timerEvent.wait(timeout)
-        if inputThread.is_alive():
-            print(f'\nGame over! You\'ve used up all of your time on this round.')
-            inputThread.join()
-            return None
-        return result[0]
-
+# be in its own directory called clients and client should handle calling the api; takes in request to hit endpoint and then gives
+    # back the data
+    # should have error handling -- send response codes; 400, 200, 500
     @staticmethod
     def generateWinningCombo(inputLength, minRandomDigit, maxRandomDigit):
         randomdotorgResponse = requests.get("https://www.random.org/integers/",
@@ -43,26 +26,29 @@ class GameUtils:
                 all(minRandomDigit <= int(char) <= maxRandomDigit for char in userGuess))
 
     @staticmethod
-    def matchingNumbers(userInput, winningCombo):
-        counter = 0
-        seen = set()
-        for num in str(winningCombo):
-            if num in userInput and num not in seen:
-                counter += min(userInput.count(num), str(winningCombo).count(num))
-                seen.add(num)
-        return counter
+    def getHint(guess, winningCombo) -> dict:
+        correctPositionAndNumber = 0
+        correctNumbers = 0
 
-    @staticmethod
-    def matchingIndices(userInput, winningCombo):
-        counter = 0
-        for i in range(len(str(winningCombo))):
-            if str(winningCombo)[i] == userInput[i]:
-                counter += 1
-        return counter
+        countedNumsInWinningCombo = collections.Counter(winningCombo)
+        countedNumsInGuess = collections.Counter(guess)
+
+        for i in countedNumsInWinningCombo:
+            if i in countedNumsInGuess:
+                correctNumbers += min(countedNumsInWinningCombo[i], countedNumsInGuess[i])
+
+        for i in range(len(winningCombo)):
+            if winningCombo[i] == guess[i]:
+                correctPositionAndNumber += 1
+
+        return {
+            "correctPositionAndNumber": correctPositionAndNumber,
+            "correctNumbers": correctNumbers
+        }
 
     @staticmethod
     def roundMultiplier(currentScore, currentRound):
-        return round(currentScore * config.ROUND_MULTIPLIER[currentRound])
+        return round(currentScore * MastermindGameMVPConfigs.ROUND_MULTIPLIER[currentRound])
 
     @staticmethod
     def difficultyMultiplier(score, multiplier):
