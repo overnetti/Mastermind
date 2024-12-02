@@ -15,12 +15,13 @@ class CreateNewPlayerService:
         self.playerStatsService = PlayerStatsManagementService(self.player)
 
     async def createNewPlayer(self, username: str, password: str) -> JSONResponse:
+
+        # todo: one single validate (20 thro 32)
         if not username or not password:
             logging.error(f"Invalid username or password provided: {traceback.format_exc()}")
             raise HTTPException(status_code=400, detail='Not a valid username or password.')
 
-        hashedPassword = self.pwd_context.hash(password)
-
+        # todo: Db file, get func
         async with sessionLocal() as session:
             async with session.begin():
 
@@ -31,6 +32,10 @@ class CreateNewPlayerService:
                         detail='That username already exists! Please try another username or log in.'
                     )
 
+                # todo: add another priv method hashPassword
+                hashedPassword = self.pwd_context.hash(password)
+
+                # todo: all these interactions is a set func in DB file
                 newUser = UsersTable(username=username, password=hashedPassword)
                 session.add(newUser)
                 await session.flush()
@@ -39,6 +44,7 @@ class CreateNewPlayerService:
                 self.player.userId = newUser.userId
                 self.player.username = username
 
+                # todo: set the playerstats, this can live in DB file for player stats
                 newPlayer = PlayerStatsTable(userId=newUser.userId)
                 session.add(newPlayer)
 

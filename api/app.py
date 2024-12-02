@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from api.database.schema.DatabaseSchema import initDB
-from api.features.PlayerData.Services.CreateNewPlayer.CreateNewPlayerService import CreateNewPlayerService
+from api.features.Users.Services.CreateNewPlayer.CreateNewPlayerService import CreateNewPlayerService
 from api.features.PlayerData.Services.PlayerDataManagement.PlayerDataManagementService import PlayerDataManagementService
-from api.features.PlayerData.Services.PlayerLogin.PlayerLoginService import PlayerLoginService
+from api.features.Users.Services.PlayerLogin.PlayerLoginService import PlayerLoginService
 from api.features.PlayerStats.Services.PlayerStatsManagementService import PlayerStatsManagementService
 from api.services.PlayMastermindGameMVP.PlayMastermindGameService import Mastermind
 import logging
@@ -25,6 +25,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("uvicorn")
+
+logging.getLogger("uvicorn").setLevel(logging.DEBUG)
+logging.getLogger("uvicorn.access").setLevel(logging.DEBUG)
 
 
 @app.on_event("startup")
@@ -95,7 +101,7 @@ async def enterGame(mode: ModeRequest) -> str:
 
 
 @app.post("/submit-guess")
-async def submitGuess(guess: GuessRequest) -> str:
+async def submitGuess(guess: GuessRequest) -> JSONResponse:
     try:
         response = await game.submitGuess(guess.guess)
         return response
@@ -128,4 +134,4 @@ async def resetGameAndPlayer() -> str:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=5000)
+    uvicorn.run(app, host="127.0.0.1", port=5000, log_level="debug")

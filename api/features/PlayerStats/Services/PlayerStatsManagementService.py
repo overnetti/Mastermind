@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy import update
 from api.database.schema.DatabaseSchema import sessionLocal, PlayerStatsTable
 from api.features.LevelUser.Services.LevelUserService import LevelUserService
+from api.services.PlayMastermindGameMVP.Configs import MastermindGameMVPConfigs
 import traceback
 import logging
 
@@ -68,12 +69,36 @@ class PlayerStatsManagementService:
                 content="Player data updated successfully.", status_code=200
             )
 
+    async def assignScores(self, baseScore, status, multiplier, roundCount):
+        gameScore = 0
+
+        if status == "lost":
+            gameScore = baseScore
+
+        elif status == "won":
+            gameScore += await self.__calculateScore(baseScore, multiplier, roundCount)
+
+        else:
+            raise ValueError(f"Invalid status: {status}. Expected 'won' or 'lost'.")
+
+        return gameScore
+
+    async def __calculateScore(self, baseScore, difficultyMultiplier, roundCounter):
+        return (self.__difficultyMultiplier(baseScore, difficultyMultiplier)
+                + self.__roundMultiplier(baseScore, roundCounter))
+
+    def __roundMultiplier(self, currentScore, currentRound):
+        return round(currentScore * MastermindGameMVPConfigs.ROUND_MULTIPLIER[currentRound])
+
+    def __difficultyMultiplier(self, score, multiplier):
+        return round(score * multiplier)
+
     async def updateEndGameStats(self, gameScore: int):
-        self.levelingService.handleLeveling(gameScore)
-        await self.updatePlayerStats(self.player.userId)
         self.player.gamesPlayed += 1
         self.player.winRate = round((self.player.gamesWon / self.player.gamesPlayed) * 100)
         self.player.highestScore = max(self.player.highestScore, gameScore)
+        self.levelingService.handleLeveling(gameScore)
+        await self.updatePlayerStats(self.player.userId)
 
     async def getPlayerStats(self, userId: str) -> JSONResponse:
         if not userId:
