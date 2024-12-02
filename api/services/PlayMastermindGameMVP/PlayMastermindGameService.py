@@ -40,7 +40,7 @@ class Mastermind:
         await self.setWinningCombo()
 
     async def setWinningCombo(self):
-        self.winningCombo = self.randomDotOrgAPIClientRequest.generateWinningCombo(
+        self.winningCombo = await self.randomDotOrgAPIClientRequest.generateWinningCombo(
             inputLength=self.inputLength,
             minRandomDigit=self.minRandomDigit,
             maxRandomDigit=self.maxRandomDigit
@@ -56,8 +56,12 @@ class Mastermind:
 
             isLastRound = self.roundCounter == self.totalRounds
 
+            hint = self.__getHint(guess, self.winningCombo)
+            numOfCorrectNums = hint["correctNumbers"]
+            numOfCorrectPositionsAndNums = hint["correctPositionAndNumber"]
+
             try:
-                hint = await self.__getHint(guess, self.winningCombo)
+                hint = self.__getHint(guess, self.winningCombo)
                 numOfCorrectNums = hint["correctNumbers"]
                 numOfCorrectPositionsAndNums = hint["correctPositionAndNumber"]
 
@@ -90,7 +94,7 @@ class Mastermind:
                 "winnerNumber": self.winningCombo  # REMOVE THIS
             })
 
-    async def __getHint(self, guess, winningCombo) -> dict:
+    def __getHint(self, guess, winningCombo) -> dict:
         correctPositionAndNumber = 0
         correctNumbers = 0
 
