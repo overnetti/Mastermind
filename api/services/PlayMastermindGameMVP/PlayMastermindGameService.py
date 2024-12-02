@@ -56,10 +56,6 @@ class Mastermind:
 
             isLastRound = self.roundCounter == self.totalRounds
 
-            hint = self.__getHint(guess, self.winningCombo)
-            numOfCorrectNums = hint["correctNumbers"]
-            numOfCorrectPositionsAndNums = hint["correctPositionAndNumber"]
-
             try:
                 hint = self.__getHint(guess, self.winningCombo)
                 numOfCorrectNums = hint["correctNumbers"]
@@ -72,9 +68,6 @@ class Mastermind:
                     await self.handleEndGame("lost")
                 else:
                     self.status = "stillPlaying"
-
-                # await self.__checkGameProgressStatus(numOfCorrectPositionsAndNums,
-                #                                      isLastRound)
 
             except Exception as e:
                 logging.error(f"Error submitting guess: {traceback.format_exc()}")
@@ -118,20 +111,9 @@ class Mastermind:
         self.roundCounter += 1
         self.remainingGuesses -= 1
 
-    # def __checkGameProgressStatus(self, numOfCorrectPositionsAndNums, isLastRound):
-    #     if numOfCorrectPositionsAndNums == self.inputLength:
-    #         await self.handleEndGame("won")
-    #         self.player.gamesWon += 1
-    #     elif isLastRound:
-    #         await self.handleEndGame("lost")
-    #     else:
-    #         self.status = "stillPlaying"
-
     async def handleEndGame(self, status):
-        logging.debug("this is handleEndGame")
         self.gameScore = await self.playerStatsService.assignScores(self.baseScore, status,
                                                                     self.multiplier, self.roundCounter)
-        logging.debug(f"here is the gameScore: {self.gameScore}")
         await self.playerStatsService.updateEndGameStats(self.gameScore)
         self.resetGame()
         self.status = status

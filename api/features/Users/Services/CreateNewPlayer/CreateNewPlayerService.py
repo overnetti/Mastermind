@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
-from sqlalchemy.future import select
-from api.database.schema.DatabaseSchema import sessionLocal, UsersTable, PlayerStatsTable
+from api.features.Users.Database.CreateNewPlayer.CreateNewPlayerDatabaseService import CreateNewPlayerDatabaseService
 from api.features.PlayerStats.Services.PlayerStatsManagementService import PlayerStatsManagementService
 from passlib.context import CryptContext
 import logging
@@ -12,45 +11,42 @@ class CreateNewPlayerService:
     def __init__(self, PlayerDataInstance):
         self.player = PlayerDataInstance
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self.createNewPlayerDBService = CreateNewPlayerDatabaseService(self)
         self.playerStatsService = PlayerStatsManagementService(self.player)
 
     async def createNewPlayer(self, username: str, password: str) -> JSONResponse:
+        try:
+            existingUser = await self.createNewPlayerDBService.validateUniqueUser(username, password)
+        except Exception as e:
+            logging.error(f"Error checking for existing users: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-        # todo: one single validate (20 thro 32)
-        if not username or not password:
-            logging.error(f"Invalid username or password provided: {traceback.format_exc()}")
-            raise HTTPException(status_code=400, detail='Not a valid username or password.')
+        if existingUser:
+            raise HTTPException(
+                status_code=400,
+                detail='That username already exists! Please try another username or log in.'
+            )
 
-        # todo: Db file, get func
-        async with sessionLocal() as session:
-            async with session.begin():
+        hashedPassword = self.__hashPassword(password)
 
-                existingUser = await session.execute(select(UsersTable).where(UsersTable.username == username))
-                if existingUser.scalars().first():
-                    raise HTTPException(
-                        status_code=400,
-                        detail='That username already exists! Please try another username or log in.'
-                    )
+        try:
+            await self.createNewPlayerDBService.addNewUserWithStats(username, hashedPassword)
+        except Exception as e:
+            logging.error(f"Error adding new user and stats: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-                # todo: add another priv method hashPassword
-                hashedPassword = self.pwd_context.hash(password)
 
-                # todo: all these interactions is a set func in DB file
-                newUser = UsersTable(username=username, password=hashedPassword)
-                session.add(newUser)
-                await session.flush()
-                await session.refresh(newUser)
-
-                self.player.userId = newUser.userId
-                self.player.username = username
-
-                # todo: set the playerstats, this can live in DB file for player stats
-                newPlayer = PlayerStatsTable(userId=newUser.userId)
-                session.add(newPlayer)
-
-        await self.playerStatsService.setPlayerStats(self.player.userId)
+        try:
+            await self.playerStatsService.setPlayerStats(self.player.userId)
+        except Exception as e:
+            logging.error(f"Error setting player stats: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
         return JSONResponse(
-            content="Account created successfully. New UserId: " + newUser.userId,
+            content="Account created successfully. New UserId: " + self.player.userId,
             status_code=200
         )
+
+    def __hashPassword(self, password):
+        return self.pwd_context.hash(password)
+

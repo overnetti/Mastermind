@@ -1,16 +1,17 @@
 class LevelUserService:
     def __init__(self, PlayerDataInstance):
         self.player = PlayerDataInstance
+        self.totalXp = None
 
     def handleLeveling(self, gameScore: int):
-        totalXp = self.player.currentXp + gameScore
+        self.totalXp = self.player.currentXp + gameScore
 
-        if totalXp < self.player.xpToNextLevel:
-            self.player.currentXp = totalXp
+        if self.totalXp < self.player.xpToNextLevel:
+            self.player.currentXp = self.totalXp
         else:
-            while totalXp >= self.player.xpToNextLevel:
-                totalXp -= self.player.xpToNextLevel
+            while self.totalXp >= self.player.xpToNextLevel:
+                self.totalXp -= self.player.xpToNextLevel
                 self.player.currentLevel += 1
                 self.player.xpToNextLevel *= 1.5
 
-            self.player.currentXp = totalXp
+            self.player.currentXp = self.totalXp

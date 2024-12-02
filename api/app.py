@@ -114,7 +114,7 @@ async def submitGuess(guess: GuessRequest) -> JSONResponse:
 async def getPlayerStats(userId: str = Query(...)) -> JSONResponse:
     try:
         playerStatsService = PlayerStatsManagementService(player)
-        response = await playerStatsService.getPlayerStats(userId)
+        response = await playerStatsService.getPlayerStatsForUserDisplay(userId)
         return response
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
