@@ -28,7 +28,7 @@ class PlayerLoginService:
             raise HTTPException(status_code=500, detail=str(e))
 
         successfulLoginMsg = JSONResponse(
-            content={"message": "Player logged in successfully"},
+            content="Player logged in successfully.",
             status_code=200
         )
 

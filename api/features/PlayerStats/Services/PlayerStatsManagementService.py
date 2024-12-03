@@ -47,7 +47,7 @@ class PlayerStatsManagementService:
             raise HTTPException(status_code=500, detail=str(e))
 
         successfullyUpdatedPlayerStatsMsg = JSONResponse(
-            content="Player data updated successfully.", status_code=200
+            content="Player stats updated successfully.", status_code=200
         )
 
         return successfullyUpdatedPlayerStatsMsg

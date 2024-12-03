@@ -13,10 +13,10 @@ const Mastermind = () => {
   const [guessHistory, setGuessHistory] = useState([]);
 
   const rules = {
-      EASY: ["10 guesses", "4 digits", "Digits between 0 and 5"],
-      NORMAL: ["10 guesses", "4 digits", "Digits between 0 and 7"],
-      HARD: ["10 guesses", "6 digits", "Digits between 0 and 9"],
-      IMPOSSIBLE: ["5 guesses", "10 digits", "Digits between 0 and 9"],
+      EASY: ["10 guesses", "4 digits between 0 and 5"],
+      NORMAL: ["10 guesses", "4 digits between 0 and 7"],
+      HARD: ["10 guesses", "6 digits between 0 and 9"],
+      IMPOSSIBLE: ["5 guesses", "10 digits between 0 and 9"],
   }
 
   const resetGame = async () => {

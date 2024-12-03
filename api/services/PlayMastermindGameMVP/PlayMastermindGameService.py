@@ -38,6 +38,11 @@ class Mastermind:
         if mode != "NORMAL":
             await self.difficultyModeService.setDifficulty(mode)
         await self.setWinningCombo()
+        successfulEntryMsg = JSONResponse(
+            content="Player successfully entered game.",
+            status_code=200
+        )
+        return successfulEntryMsg
 
     async def setWinningCombo(self):
         self.winningCombo = await self.randomDotOrgAPIClientRequest.generateWinningCombo(

@@ -89,10 +89,10 @@ async def updatePlayerData(stats: PlayerStats) -> JSONResponse:
 
 
 @app.post("/enter-game")
-async def enterGame(mode: ModeRequest) -> str:
+async def enterGame(mode: ModeRequest) -> JSONResponse:
     try:
         response = await game.enterGame(mode.mode)
-        return json.dumps(response)
+        return response
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -122,11 +122,11 @@ async def getPlayerStats(userId: str = Query(...)) -> JSONResponse:
 
 
 @app.post("/reset")
-async def resetGameAndPlayer() -> str:
+async def resetGameAndPlayer() -> JSONResponse:
     try:
         game.resetGame()
         player.resetPlayerData()
-        return "Game and player have reset."
+        return JSONResponse(content="Game and player have reset.", status_code=200)
     except Exception as e:
         logging.error(f"Error fetching player data: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))

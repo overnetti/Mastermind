@@ -38,8 +38,7 @@ const Difficulty = () => {
           <span className="difficulty-title-button">Easy</span>
           <ul className="difficulty-rules">
             <li>10 guesses</li>
-            <li>4 digits</li>
-            <li>Digits between 0 and 5</li>
+            <li>4 digits between 0 and 5</li>
           </ul>
         </button>
 
@@ -51,8 +50,7 @@ const Difficulty = () => {
           <span className="difficulty-title-button">Normal</span>
           <ul className="difficulty-rules">
             <li>10 guesses</li>
-            <li>4 digits</li>
-            <li>Digits between 0 and 7</li>
+            <li>4 digits between 0 and 7</li>
           </ul>
         </button>
 
@@ -64,8 +62,7 @@ const Difficulty = () => {
           <span className="difficulty-title-button">Hard</span>
           <ul className="difficulty-rules">
             <li>10 guesses</li>
-            <li>6 digits</li>
-            <li>Digits between 0 and 9</li>
+            <li>6 digits between 0 and 9</li>
           </ul>
         </button>
 
@@ -77,8 +74,7 @@ const Difficulty = () => {
           <span className="difficulty-title-button">Impossible</span>
           <ul className="difficulty-rules">
             <li>5 guesses</li>
-            <li>10 digits</li>
-            <li>Digits between 0 and 9</li>
+            <li>10 digits between 0 and 9</li>
           </ul>
         </button>
       </div>

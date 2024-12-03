@@ -1,68 +1,45 @@
 # Mastermind
-## Dependencies
-Use `install package` in root folder to download dependencies.
-1. Python 3.12
-2. FastAPI
 
-# Game plan
-So configs are done
+## About
 
-questions:
-1. only mastermind.py should exist
-2. functions need to take the difficulty as input to determine what configs to use
-5. Mastermind.py
-   6. crux of the game
-   7. playGame
-   8. win
-   9. scoring
-   9. playagain? game_utils?
-   10. leveling? game_utils?
+## Getting Started
+
+## Technologies, Code Structure, and Thought Process
 
 
-# API
-## Endpoints
-1. make larger functions into endpoints + then assess
-2. getting data on games and users for research/ensuring data persisted
+## API
+### Endpoints
 
-### Database Schema -- SQL
-Users table
-1. userID
-2. username
-2. password
+| Method | Endpoint             | Parameters                                             | Defaults | Outputs (Type and Content)                                                                                                                                                                                                                                | Purpose                                                                                                                                   |
+|--------|----------------------|--------------------------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| POST   | /create-user         | Users Body<br/> username: String<br/> password: String | N/A      | JSONResponse<br/> ```content="Account created successfully. New User Id: {userId}"```                                                                                                                                                                     | Creates both a new user in the database with a hashed password and a player instance for immediate gameplay.                              |
+| POST   | /login               | Users Body<br/> username: String<br/> password: String | N/A      | JSONResponse<br/> ```content="Player logged in successfully."```                                                                                                                                                                                          | Logs user in and loads their player stats and data for immediate gameplay.                                                                |
+| PUT    | /update-player-stats | PlayerStats Body<br/> userId: String                   | N/A      | JSONResponse<br/> ```content="Player stats updated successfully."```                                                                                                                                                                                      | Updates PlayerStats table with player's new stats acquired after finishing a game.                                                        |
+| POST   | /enter-game          | ModeRequest Body<br/> mode: String                     | "NORMAL" | JSONResponse<br/> ```content="Player successfully entered game."```                                                                                                                                                                                       | Enters user into the game by populating the game with the corresponding configurations based on the difficulty mode (defaults to Normal). |
+| POST   | /submit-guess        | GuessRequest Body<br/> guess: String                   | N/A      | JSONResponse<br/> ```userId```: String, ```status```: String, ```correctNumbers```: Int, ```correctPositionsAndNumbers```: Int, ```guess```: String, ```currentRound```: Int, ```totalRounds```: Int, ```isLastRound```: Int, ```remainingGuesses```: Int | Submits a player's guess for validation and evaluation in order to generate a hint, win, or lose.                                         |
+| GET    | /get-player-stats    | Query<br/> userId: String                              | N/A      | JSONResponse<br/> PlayerStatsTable                                                                                                                                                                                                                        | Returns player's stats directly from the database as validation to be displayed for the user on the frontend at the end of a game.        |
+| POST   | /reset               | None                                                   | N/A      | JSONResponse<br/>  ```content="Game and player have reset."```                                                                                                                                                                                            | Resets both in-memory player instance and game instance for fresh login.                                                                  |
 
-player stats
-1. userId
-2. currentLevel
-3. xpToNextLevel
-4. currentXp
-5. highestScore
-6. gamesWon
-7. gamesPlayed
-8. winRate
+### Sequence Diagram
 
-Multiplayer tables? How?
+## Database
+### Schema
+![Database Schema](assets/MastermindDatabaseSchema.svg)
 
-Must have tests for endpoints
-Must have logs
+## Future Implementations
 
-Frontend stuff I have to do:
-- Let user know if they have an invalid password/username combo
-- Dynamically alert on frontend of insufficient values for guess
-- Dynamic error messages
+### Features
+#### LevelUserService
+- Reward at specific levels
+- Achievements at specific levels
 
-Backend stuff:
-- Dynamic error messages
-- Make sure people cant create same username in backend (case sensitivity)
-- What happens if I try to submit a guess after winning? -- just lock the submission on frontend.
-- Check for userId on each round.
-- Clean logic code
-- Adjust what should be async and what shouldnt (db updates yes, otherwise not needed)
-- when a user navigates away, or the user exits (add exit button)
-  - the data in the player class and mastermind class needs to be reset for a clean slate.
-  - update endpoint to reset these...
+### Server
+- User authentication and authorization using JWT tokens, so sessions expire after a certain amount of time
+- Further testing on PlayMastermindGameService and corresponding features
+- Implement feature flags for each feature and dynamically adjust frontend accordingly
+- Consolidate components on the frontend for more universal styles
 
-IF I HAVE TIME:
-- Pw auth
+## Contributions
+Please feel free to contribute to this project by either submitting an issue or opening a pull request. All contributions
+are welcome and encouraged :).
 
-TODO:
-- Implement feature flag check and dynamically adjust frontend accordingly
