@@ -11,7 +11,7 @@ class PlayerStatsManagementDatabaseService:
     def __init__(self, PlayerStatsManagementService):
         self.playerStatsManagementService = PlayerStatsManagementService
 
-    async def getPlayerStats(self, userId):
+    async def getPlayerStats(self, userId: str):
         if not userId:
             logging.error(f"Player not found: {traceback.format_exc()}")
             raise HTTPException(status_code=404, detail="Player not found. UserId is required to retrieve player stats.")
@@ -20,7 +20,7 @@ class PlayerStatsManagementDatabaseService:
             result = await session.execute(select(PlayerStatsTable).where(PlayerStatsTable.userId == userId))
             return result.scalars().first()
 
-    async def putPlayerStats(self, userId):
+    async def putPlayerStats(self, userId: str):
         if not userId:
             logging.error(f"Error with updating player stats: {traceback.format_exc()}")
             raise HTTPException(status_code=400, detail='UserId required to update player data.')

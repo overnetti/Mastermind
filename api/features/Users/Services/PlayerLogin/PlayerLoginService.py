@@ -15,14 +15,24 @@ class PlayerLoginService:
         self.playerStatsService = PlayerStatsManagementService(self.player)
 
     async def logPlayerIn(self, username: str, password: str) -> JSONResponse:
-        await self.playerLoginDBService.validateUserSignIn(username, password)
+        try:
+            await self.playerLoginDBService.validateUserSignIn(username, password)
+        except Exception as e:
+            logging.error(f"Error validating user's sign in: {traceback.format_exc()}")
+            raise HTTPException(status_code=400, detail=str(e))
 
-        await self.playerStatsService.setPlayerStats(self.player.userId)
+        try:
+            await self.playerStatsService.setPlayerStats(self.player.userId)
+        except Exception as e:
+            logging.error(f"Error setting player's stats: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-        return JSONResponse(
+        successfulLoginMsg = JSONResponse(
             content={"message": "Player logged in successfully"},
             status_code=200
         )
+
+        return successfulLoginMsg
 
     async def verifyPassword(self, plainPassword: str, hashedPassword: str) -> bool:
         return self.pwd_context.verify(plainPassword, hashedPassword)

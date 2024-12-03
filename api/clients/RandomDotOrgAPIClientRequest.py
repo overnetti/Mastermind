@@ -8,8 +8,7 @@ class RandomDotOrgAPIClientRequest:
     def __init__(self):
         self.RandomDotOrgURL = "https://www.random.org/integers/"
 
-    async def generateWinningCombo(self, inputLength, minRandomDigit, maxRandomDigit):
-        # todo: wrap in try/catch
+    async def generateWinningCombo(self, inputLength: int, minRandomDigit: int, maxRandomDigit: int) -> str:
         try:
             randomdotorgResponse = requests.get(self.RandomDotOrgURL,
                                                 params={'num': inputLength, 'min': minRandomDigit,

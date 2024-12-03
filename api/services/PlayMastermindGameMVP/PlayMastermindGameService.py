@@ -47,47 +47,53 @@ class Mastermind:
         )
 
     async def submitGuess(self, guess: str) -> JSONResponse:
-        if self.player.userId:
-            if not MastermindGameUtils.MastermindGameUtils.isPassingRequirements(guess, self.inputLength,
-                                                              self.minRandomDigit, self.maxRandomDigit):
-                raise ValueError({"ERROR": "Guess does not meet requirements."})
+        try:
+            guessValidation = self.__validateUserGuess(guess)
+        except Exception as e:
+            logging.error(f"Error validating guess: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-            self.__updateRoundData()
+        if not guessValidation:
+            raise ValueError({"ERROR": "Guess does not meet requirements."})
 
-            isLastRound = self.roundCounter == self.totalRounds
+        self.__updateRoundData()
 
-            try:
-                hint = self.__getHint(guess, self.winningCombo)
-                numOfCorrectNums = hint["correctNumbers"]
-                numOfCorrectPositionsAndNums = hint["correctPositionAndNumber"]
+        isLastRound = self.roundCounter == self.totalRounds
 
-                if numOfCorrectPositionsAndNums == self.inputLength:
-                    self.player.gamesWon += 1
-                    await self.handleEndGame("won")
-                elif isLastRound:
-                    await self.handleEndGame("lost")
-                else:
-                    self.status = "stillPlaying"
+        try:
+            hint = self.__getHint(guess, self.winningCombo)
+            numOfCorrectNums = hint["correctNumbers"]
+            numOfCorrectPositionsAndNums = hint["correctPositionAndNumber"]
 
-            except Exception as e:
-                logging.error(f"Error submitting guess: {traceback.format_exc()}")
-                raise HTTPException(status_code=400, detail=str(e))
+            if numOfCorrectPositionsAndNums == self.inputLength:
+                self.player.gamesWon += 1
+                await self.handleEndGame("won")
+            elif isLastRound:
+                await self.handleEndGame("lost")
+            else:
+                self.status = "stillPlaying"
 
-            # TODO: Remove the winning number when ready and stop console logging
-            return JSONResponse(content={
-                "userId": self.player.userId,
-                "status": self.status,
-                "correctNumbers": str(numOfCorrectNums),
-                "correctPositionsAndNumbers": str(numOfCorrectPositionsAndNums),
-                "guess": guess,
-                "currentRound": self.roundCounter,
-                "totalRounds": self.totalRounds,
-                "isLastRound": isLastRound,
-                "remainingGuesses": self.remainingGuesses,
-                "winnerNumber": self.winningCombo  # REMOVE THIS
-            })
+        except Exception as e:
+            logging.error(f"Error submitting guess: {traceback.format_exc()}")
+            raise HTTPException(status_code=400, detail=str(e))
 
-    def __getHint(self, guess, winningCombo) -> dict:
+        # todo: remove winning number when ready
+        roundData = JSONResponse(content={
+            "userId": self.player.userId,
+            "status": self.status,
+            "correctNumbers": str(numOfCorrectNums),
+            "correctPositionsAndNumbers": str(numOfCorrectPositionsAndNums),
+            "guess": guess,
+            "currentRound": self.roundCounter,
+            "totalRounds": self.totalRounds,
+            "isLastRound": isLastRound,
+            "remainingGuesses": self.remainingGuesses,
+            "winnerNumber": self.winningCombo
+        })
+
+        return roundData
+
+    def __getHint(self, guess: str, winningCombo: str) -> dict:
         correctPositionAndNumber = 0
         correctNumbers = 0
 
@@ -111,12 +117,23 @@ class Mastermind:
         self.roundCounter += 1
         self.remainingGuesses -= 1
 
-    async def handleEndGame(self, status):
+    def __validateUserGuess(self, guess: str) -> bool:
+        if self.player.userId:
+            if not MastermindGameUtils.MastermindGameUtils.isPassingRequirements(guess, self.inputLength,
+                                                                                 self.minRandomDigit, self.maxRandomDigit):
+                return False
+            return True
+
+    async def handleEndGame(self, status: str):
+        self.status = status
         self.gameScore = await self.playerStatsService.assignScores(self.baseScore, status,
                                                                     self.multiplier, self.roundCounter)
-        await self.playerStatsService.updateEndGameStats(self.gameScore)
-        self.resetGame()
-        self.status = status
+
+        try:
+            await self.playerStatsService.updateEndGameStats(self.gameScore)
+        except Exception as e:
+            logging.error(f"Error updating end game stats: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     def resetGame(self):
         self.__init__(self.player)

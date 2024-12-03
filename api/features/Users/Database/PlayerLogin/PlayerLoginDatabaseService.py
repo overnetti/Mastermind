@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from fastapi.responses import JSONResponse
 from sqlalchemy.future import select
 from api.database.schema.DatabaseSchema import sessionLocal, UsersTable
 import logging
@@ -10,7 +9,7 @@ class PlayerLoginDatabaseService:
     def __init__(self, PlayerLoginService):
         self.playerLoginService = PlayerLoginService
 
-    async def validateUserSignIn(self, username, password):
+    async def validateUserSignIn(self, username: str, password: str):
         async with sessionLocal() as session:
             async with session.begin():
                 result = await session.execute(select(UsersTable).where(UsersTable.username == username))

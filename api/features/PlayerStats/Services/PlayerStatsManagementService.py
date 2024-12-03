@@ -32,10 +32,12 @@ class PlayerStatsManagementService:
             logging.error(f"Error setting player stats: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
 
-        return JSONResponse(
+        successfullySetDataMsg = JSONResponse(
             content="Player data set successfully.",
             status_code=200
         )
+
+        return successfullySetDataMsg
 
     async def updatePlayerStats(self, userId: str) -> JSONResponse:
         try:
@@ -44,30 +46,35 @@ class PlayerStatsManagementService:
             logging.error(f"Error updating player stats: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
 
-        return JSONResponse(
+        successfullyUpdatedPlayerStatsMsg = JSONResponse(
             content="Player data updated successfully.", status_code=200
         )
 
-    async def assignScores(self, baseScore, status, multiplier, roundCount):
-        gameScore = 0
+        return successfullyUpdatedPlayerStatsMsg
 
-        if status == "lost":
-            gameScore = baseScore
-        elif status == "won":
-            gameScore += await self.__calculateScore(baseScore, multiplier, roundCount)
-        else:
-            raise ValueError(f"Invalid status: {status}. Expected 'won' or 'lost'.")
+    async def assignScores(self, baseScore: int, status: str, multiplier: int, roundCount: int) -> int:
+        gameScore = 0
+        try:
+            if status == "lost":
+                gameScore = baseScore
+            elif status == "won":
+                gameScore += await self.__calculateScore(baseScore, multiplier, roundCount)
+            else:
+                raise ValueError(f"Invalid status: {status}. Expected 'won' or 'lost'.")
+        except Exception as e:
+            logging.error(f"Error assigning scores: {traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=str(e))
 
         return gameScore
 
-    async def __calculateScore(self, baseScore, difficultyMultiplier, roundCounter):
+    async def __calculateScore(self, baseScore: int, difficultyMultiplier: int, roundCounter: int) -> int:
         return (self.__difficultyMultiplier(baseScore, difficultyMultiplier)
                 + self.__roundMultiplier(baseScore, roundCounter))
 
-    def __roundMultiplier(self, currentScore, currentRound):
+    def __roundMultiplier(self, currentScore: int, currentRound: int) -> int:
         return round(currentScore * MastermindGameMVPConfigs.ROUND_MULTIPLIER[currentRound])
 
-    def __difficultyMultiplier(self, score, multiplier):
+    def __difficultyMultiplier(self, score: int, multiplier: int) -> int:
         return round(score * multiplier)
 
     async def updateEndGameStats(self, gameScore: int):
@@ -84,7 +91,7 @@ class PlayerStatsManagementService:
             logging.error(f"Error getting player stats: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
 
-        return JSONResponse(
+        dataToDisplay = JSONResponse(
             content={
                 "userId": playerStats.userId,
                 "currentLevel": playerStats.currentLevel,
@@ -96,3 +103,5 @@ class PlayerStatsManagementService:
                 "winRate": playerStats.winRate
             }
         )
+
+        return dataToDisplay

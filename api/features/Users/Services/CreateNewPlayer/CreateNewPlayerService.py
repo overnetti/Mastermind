@@ -35,7 +35,6 @@ class CreateNewPlayerService:
             logging.error(f"Error adding new user and stats: {traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=str(e))
 
-
         try:
             await self.playerStatsService.setPlayerStats(self.player.userId)
         except Exception as e:

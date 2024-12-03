@@ -4,7 +4,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from api.database.schema.DatabaseSchema import initDB
 from api.features.Users.Services.CreateNewPlayer.CreateNewPlayerService import CreateNewPlayerService
-from api.features.PlayerData.Services.PlayerDataManagement.PlayerDataManagementService import PlayerDataManagementService
+from api.features.PlayerData.Services.PlayerDataManagement.PlayerDataManagementService import (
+    PlayerDataManagementService)
 from api.features.Users.Services.PlayerLogin.PlayerLoginService import PlayerLoginService
 from api.features.PlayerStats.Services.PlayerStatsManagementService import PlayerStatsManagementService
 from api.services.PlayMastermindGameMVP.PlayMastermindGameService import Mastermind
@@ -17,7 +18,6 @@ app = FastAPI()
 player = PlayerDataManagementService()
 game = Mastermind(player)
 
-# Allows API to be queried by frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -38,13 +38,11 @@ async def startup():
     await initDB()
 
 
-# Todo: Move these to their own schema file
 class Users(BaseModel):
     username: str
     password: str
 
 
-# Player stats schema for FastAPI
 class PlayerStats(BaseModel):
     userId: str
 
@@ -104,6 +102,8 @@ async def enterGame(mode: ModeRequest) -> str:
 async def submitGuess(guess: GuessRequest) -> JSONResponse:
     try:
         response = await game.submitGuess(guess.guess)
+        if game.status == "won" or game.status == "lost":
+            game.resetGame()
         return response
     except Exception as e:
         logging.error(f"Error with submitting guess: {traceback.format_exc()}")
