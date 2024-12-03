@@ -18,7 +18,10 @@ for gameplay, user input validation, scoring, game state management, and interac
 """
 class Mastermind:
     def __init__(self, player: PlayerDataManagementService):
-        """ Instantiates services and instance variables for gameplay. """
+        """
+        Instantiates services and instance variables for gameplay.
+        @params {PlayerDataManagementService} player - Instance containing player's data and stats.
+        """
         self.player = player
         self.levelingService = LevelUserService(self.player)
         self.playerStatsService = PlayerStatsManagementService(self.player)
@@ -43,7 +46,8 @@ class Mastermind:
         Enters the user into the game by setting the difficulty-based configurations.
         @param {string} mode - The difficulty level of the game. Defaults to Normal.
         @returns {JSONResponse} Success message.
-        @throws {Error} HTTPException: Throws a 500 error if an error occurs setting the difficulty or the winning combination.
+        @throws {HTTPException}
+            - 500: If an error occurs setting the difficulty or the winning combination.
         """
         if mode != "NORMAL":
             await self.difficultyModeService.setDifficulty(mode)
@@ -58,7 +62,8 @@ class Mastermind:
         """
         Sets the game instance's winning combination to the generated winning combination.
         @returns None.
-        @throws {Error} HTTPException: Throws a 500 error if an error occurs calling the Random.org API Client.
+        @throws {HTTPException}:
+            - 500: If an error occurs calling the Random.org API Client.
         """
         self.winningCombo = await self.randomDotOrgAPIClientRequest.generateWinningCombo(
             inputLength=self.inputLength,
@@ -71,7 +76,9 @@ class Mastermind:
         Submits the users guess for validation and analysis while advancing the round.
         @param {string} guess - A user's guess to be played against the winning combination.
         @returns {JSONResponse} Object containing the round's data for the frontend.
-        @throws {Error} HTTPException if an issue occurs validating the guess and a ValueError if the guess does not meet requirements.
+        @throws {HTTPException}
+            - 500: If an error occurs validating the guess.
+            - ValueError: If the guess does not meet requirements.
         """
         try:
             guessValidation = self.__validateUserGuess(guess)
@@ -172,7 +179,8 @@ class Mastermind:
         """
         Handles end of game processes, such as assigning scores and updating player stats based on their performance.
         @param {String} status - Final status of the game (e.g. "won" or "lost").
-        @returns {Error} HTTPException: If an error occurs updating the game stats, a 500 error is raised.
+        @returns {HTTPException}
+            - 500: If an error occurs updating the game stats.
         """
         self.status = status
         self.gameScore = await self.playerStatsService.assignScores(self.baseScore, status,
@@ -188,7 +196,8 @@ class Mastermind:
         """
         Resets the game to its initial state for a fresh game.
         @returns None.
-        @throws {Error} HTTPException: 400 Error if the player instance provided is invalid (user is logged out)
+        @throws {HTTPException}:
+            - 400: If the player instance provided is invalid (example: user is logged out)
         """
         try:
             self.__init__(self.player)
