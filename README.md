@@ -1,13 +1,25 @@
 # Mastermind
+Welcome to Mastermind, a code-breaking game where players guess the correct sequence of numbers within a set number of attempts!
 
 ## About
+Mastermind is a logic-based game designed to challenge your deductive reasoning skills. Players attempt to uncover a hidden code by making guesses and receiving hints about the accuracy of their numbers and positions. This implementation supports multiple difficulty modes and tracks player statistics to enhance the gameplay experience.
+
+This is a full-stack version of the game 
 
 ## Getting Started
+```pip install .```
+```npm start```
+
+API port: 5000<br/>
+Frontend port: 3000
 
 ## Technologies, Code Structure, and Thought Process
-
+- React
+- FastAPI
 
 ## API
+This API runs on FastAPI. Documentation on FastAPI can be found [here](https://devdocs.io/fastapi/).
+
 ### Endpoints
 
 | Method | Endpoint             | Parameters                                             | Defaults | Outputs (Type and Content)                                                                                                                                                                                                                                | Purpose                                                                                                                                   |
@@ -21,13 +33,13 @@
 | POST   | /reset               | None                                                   | N/A      | JSONResponse<br/>  ```content="Game and player have reset."```                                                                                                                                                                                            | Resets both in-memory player instance and game instance for fresh login.                                                                  |
 
 ### Sequence Diagram
+[Insert sequence diagram]
 
 ## Database
 ### Schema
 ![Database Schema](assets/MastermindDatabaseSchema.svg)
 
 ## Future Implementations
-
 ### Server
 - User authentication and authorization using JWT tokens, so sessions expire after a certain amount of time
 - Further testing on PlayMastermindGameService and corresponding features
