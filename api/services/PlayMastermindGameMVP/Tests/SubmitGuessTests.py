@@ -3,11 +3,10 @@ import unittest
 from unittest.mock import AsyncMock, MagicMock
 import json
 
-
+"""
+Tests the response object to the frontend by the API when submitting a guess.
+"""
 class TestMastermindSubmitGuess(unittest.IsolatedAsyncioTestCase):
-    """
-    Tests updates to status, invalid guesses, round increments, and guess decrements when submitting a guess.
-    """
     async def asyncSetUp(self):
         """ Mock data in preparation for tests """
         self.mockPlayer = MagicMock(userId="testUserId1234", gamesWon=0)
@@ -15,7 +14,6 @@ class TestMastermindSubmitGuess(unittest.IsolatedAsyncioTestCase):
         self.mockPlayerStatsService = AsyncMock()
         self.mockRandomDotOrgAPIClient = AsyncMock()
         self.game = Mastermind(player=self.mockPlayer)
-
         self.game.randomDotOrgAPIClientRequest = self.mockRandomDotOrgAPIClient
         self.game.playerStatsService = self.mockPlayerStatsService
 
@@ -23,6 +21,9 @@ class TestMastermindSubmitGuess(unittest.IsolatedAsyncioTestCase):
         self.game.winningCombo = "0115"
 
     async def testSubmitGuessIncorrectRoundOne(self):
+        """
+        Tests an incorrect guess submission on the first round
+        """
         # Arrange
         self.game.roundCounter = 0
         self.game.remainingGuesses = 10
@@ -43,7 +44,10 @@ class TestMastermindSubmitGuess(unittest.IsolatedAsyncioTestCase):
         assert parsedResponse["isLastRound"] == False
         assert parsedResponse["remainingGuesses"] == 9
 
-    async def testSubmitGuessCorrect(self):
+    async def testSubmitGuessCorrectRoundOne(self):
+        """
+        Tests a correct guess submission on the first round
+        """
         # Arrange
         self.game.roundCounter = 0
         self.game.remainingGuesses = 10
@@ -64,7 +68,10 @@ class TestMastermindSubmitGuess(unittest.IsolatedAsyncioTestCase):
         assert parsedResponse["isLastRound"] == False
         assert parsedResponse["remainingGuesses"] == 9
 
-    async def testSubmitGuessLastRound(self):
+    async def testSubmitGuessIncorrectLastRound(self):
+        """
+        Tests an incorrect guess submission on the last round to make sure the user loses
+        """
         # Arrange
         self.game.roundCounter = 9
         self.game.remainingGuesses = 1
@@ -86,6 +93,9 @@ class TestMastermindSubmitGuess(unittest.IsolatedAsyncioTestCase):
         assert parsedResponse["remainingGuesses"] == 0
 
     async def testSubmitGuessInvalidGuess(self):
+        """
+        Tests that an invalid guess submission is caught as a ValueError
+        """
         # Arrange
         self.game.roundCounter = 0
         self.game.remainingGuesses = 10

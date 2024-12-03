@@ -1,3 +1,6 @@
+"""
+This file contains the base Mastermind game configurations.
+"""
 ROUND_COUNTER = 0
 CURRENT_SCORE = 0
 ROUND_SCORE = 0

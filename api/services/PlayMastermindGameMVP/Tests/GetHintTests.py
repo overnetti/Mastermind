@@ -2,9 +2,10 @@ from api.services.PlayMastermindGameMVP.PlayMastermindGameService import Masterm
 import unittest
 from unittest.mock import MagicMock
 
-
+""" Testing core algorithm that analyzes a users guess for correct numbers and correct positions & numbers. """
 class MastermindGetHintTest(unittest.TestCase):
     def setUp(self):
+        """ Arrange mock data for tests. """
         self.mockPlayer = MagicMock()
         self.game = Mastermind(player=self.mockPlayer)
 
@@ -100,7 +101,7 @@ class MastermindGetHintTest(unittest.TestCase):
 
     def testLongNumberSequence(self):
         """
-        Test example #4 from the challenge prompt.
+        Test a long number sequence.
         """
         # Arrange
         winningCombo = "0135012341"

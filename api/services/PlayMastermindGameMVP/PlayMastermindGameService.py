@@ -12,9 +12,13 @@ import logging
 import traceback
 import collections
 
-
+"""
+The Mastermind class encapsulates the core logic for the Mastermind game, providing central game controller methods 
+for gameplay, user input validation, scoring, game state management, and interaction with auxiliary services.
+"""
 class Mastermind:
     def __init__(self, player: PlayerDataManagementService):
+        """ Instantiates services and instance variables for gameplay. """
         self.player = player
         self.levelingService = LevelUserService(self.player)
         self.playerStatsService = PlayerStatsManagementService(self.player)
@@ -34,7 +38,13 @@ class Mastermind:
         self.status = None
         self.gameScore = 0
 
-    async def enterGame(self, mode="NORMAL"):
+    async def enterGame(self, mode="NORMAL") -> JSONResponse:
+        """
+        Enters the user into the game by setting the difficulty-based configurations.
+        @param {string} mode - The difficulty level of the game. Defaults to Normal.
+        @returns {JSONResponse} Success message.
+        @throws {Error} HTTPException: Throws a 500 error if an error occurs setting the difficulty or the winning combination.
+        """
         if mode != "NORMAL":
             await self.difficultyModeService.setDifficulty(mode)
         await self.setWinningCombo()
@@ -45,6 +55,11 @@ class Mastermind:
         return successfulEntryMsg
 
     async def setWinningCombo(self):
+        """
+        Sets the game instance's winning combination to the generated winning combination.
+        @returns None.
+        @throws {Error} HTTPException: Throws a 500 error if an error occurs calling the Random.org API Client.
+        """
         self.winningCombo = await self.randomDotOrgAPIClientRequest.generateWinningCombo(
             inputLength=self.inputLength,
             minRandomDigit=self.minRandomDigit,
@@ -52,6 +67,12 @@ class Mastermind:
         )
 
     async def submitGuess(self, guess: str) -> JSONResponse:
+        """
+        Submits the users guess for validation and analysis while advancing the round.
+        @param {string} guess - A user's guess to be played against the winning combination.
+        @returns {JSONResponse} Object containing the round's data for the frontend.
+        @throws {Error} HTTPException if an issue occurs validating the guess and a ValueError if the guess does not meet requirements.
+        """
         try:
             guessValidation = self.__validateUserGuess(guess)
         except Exception as e:
@@ -99,6 +120,15 @@ class Mastermind:
         return roundData
 
     def __getHint(self, guess: str, winningCombo: str) -> dict:
+        """
+        Analyzes the users guess against the winning combination to determine the count of correct numbers in the
+        correct position and the count of correct numbers regardless of their position.
+        @param {String} guess - The player's current guess.
+        @param {String} winningCombo - The game's winning combination.
+        @returns {Dictionary} Dict containing:
+            - correctPositionAndNumber {Int} - The number of digits correctly guessed in the exact positions.
+            - correctNumbers {Int} - The total count of correct digits, regardless of position.
+        """
         correctPositionAndNumber = 0
         correctNumbers = 0
 
@@ -119,10 +149,19 @@ class Mastermind:
         }
 
     def __updateRoundData(self):
+        """
+        Updates the round data after a guess is made by incrementing the round counter and decrementing the remaining guesses.
+        @returns None.
+        """
         self.roundCounter += 1
         self.remainingGuesses -= 1
 
     def __validateUserGuess(self, guess: str) -> bool:
+        """
+        Validates the user's guess based on the requirements imposed by the game instance configurations.
+        @params {String} guess - User's guess.
+        @returns {Boolean} True if the guess is valid, False otherwise.
+        """
         if self.player.userId:
             if not MastermindGameUtils.MastermindGameUtils.isPassingRequirements(guess, self.inputLength,
                                                                                  self.minRandomDigit, self.maxRandomDigit):
@@ -130,6 +169,11 @@ class Mastermind:
             return True
 
     async def handleEndGame(self, status: str):
+        """
+        Handles end of game processes, such as assigning scores and updating player stats based on their performance.
+        @param {String} status - Final status of the game (e.g. "won" or "lost").
+        @returns {Error} HTTPException: If an error occurs updating the game stats, a 500 error is raised.
+        """
         self.status = status
         self.gameScore = await self.playerStatsService.assignScores(self.baseScore, status,
                                                                     self.multiplier, self.roundCounter)
@@ -141,4 +185,13 @@ class Mastermind:
             raise HTTPException(status_code=500, detail=str(e))
 
     def resetGame(self):
-        self.__init__(self.player)
+        """
+        Resets the game to its initial state for a fresh game.
+        @returns None.
+        @throws {Error} HTTPException: 400 Error if the player instance provided is invalid (user is logged out)
+        """
+        try:
+            self.__init__(self.player)
+        except Exception as e:
+            logging.error(f"Error resetting the game: {traceback.format_exc()}")
+            raise HTTPException(status_code=400, detail=str(e))
