@@ -91,7 +91,7 @@ This API runs on FastAPI. Documentation on FastAPI can be found [here](https://d
 
 ### Sequence Diagram
 This sequence diagram starts with the POST /enter-game request, followed by a POST /submit-guess of an incorrect guess. The user then wins on the second POST /submit-guess and the sequence diagram showcases the data traversal across services to update the stats before finally saving to the database.<br/>
-![APISequenceDiagram](assets/MastermindAPISeqDiagram.svg)
+![APISequenceDiagram](assets/MastermindAPISequenceDiagram.svg)
 (Please right-click and open the image in a new tab for greater readability)
 
 ## Database
