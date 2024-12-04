@@ -2,20 +2,57 @@
 Welcome to Mastermind, a code-breaking game where players guess the correct sequence of numbers within a set number of attempts!
 
 ## About
-Mastermind is a logic-based game designed to challenge your deductive reasoning skills. Players attempt to uncover a hidden code by making guesses and receiving hints about the accuracy of their numbers and positions. This implementation supports multiple difficulty modes and tracks player statistics to enhance the gameplay experience.
+Mastermind is a logic-based game designed to challenge your deductive reasoning skills. Players attempt to uncover a hidden code by making guesses and receiving hints about the accuracy of their numbers and positions.
 
-This is a full-stack version of the game 
+This is a full-stack version of the game that utilizes a React frontend, a FastAPI backend, and a SQL database.
+
+### Additional features
+The game also includes the following additional features:
+- Choice of Difficulty Modes: Easy, Normal, Hard, and Impossible
+  - Easy: 4 digits ranging from 0 to 5, 10 guesses
+  - Normal: 4 digits ranging from 0 to 7, 10 guesses (core game)
+  - Hard: 6 digits between 0 and 9, 10 guesses
+  - Impossible: 10 digits between 0 and 9, 5 guesses
+- Account creation and login
+- Leveling System: Players level up quickest by winning games but receive some XP for trying as well
+- Player Statistics which track a user's:
+  - Current level
+  - Experience needed to attain the next level
+  - Current amount of experience
+  - Highest score ever achieved
+  - Total number of games won
+  - Total number of games played
+  - Win rate
 
 ## Getting Started
-```pip install .```
-```npm start```
+Before beginning, make sure you have Node.js, React, Python3.12 installed
 
-API port: 5000<br/>
-Frontend port: 3000
+1. Clone the repository
+   - Clone the following repo to your machine:
+`git clone https://github.com/overnetti/Mastermind.git`
+2. Install dependencies:
+   - Navigate to the root directory of the project
+   - For the frontend, change directories to the `mastermind-frontend` folder:
+     - `cd mastermind-frontend`
+   - And run:
+     - `npm install`
+   - For the backend, change directories to the `api` folder:
+     - `cd ../api` 
+   - And run:
+     - `pip install -r requirements.txt`
+   - For the database, ensure you have a SQL database viewer on your machine (e.g. [DBeaver](https://dbeaver.io/download/), [MySQL Workbench](https://dev.mysql.com/downloads/workbench/), [DB Browser for SQL Lite](https://sqlitebrowser.org/dl/), etc.)
 
-## Technologies, Code Structure, and Thought Process
-- React
-- FastAPI
+### Running the Application
+To run the frontend (Note that the frontend will run on port 3000):
+   - Navigate to the `mastermind-frontend` folder:
+     - `cd mastermind-frontend`
+   - Run the following command:
+     - `npm start`
+To run the backend (Note that the backend will run on port 5000):
+   - Navigate to the root directory of the project:
+     - `cd ..`
+   - And run:
+     - `python3.12 -m api.app`
 
 ## API
 This API runs on FastAPI. Documentation on FastAPI can be found [here](https://devdocs.io/fastapi/).
@@ -39,8 +76,19 @@ This API runs on FastAPI. Documentation on FastAPI can be found [here](https://d
 ### Schema
 ![Database Schema](assets/MastermindDatabaseSchema.svg)
 
+## Technologies, Code Structure, and Thought Process
+### Technologies
+- React
+- FastAPI
+- SQL
+
+### Code Structure
+
+### Thought Process
+
 ## Future Implementations
 ### Server
+- Decoupling database logic from service code so that it is run via the endpoint instead
 - User authentication and authorization using JWT tokens, so sessions expire after a certain amount of time
 - Further testing on PlayMastermindGameService and corresponding features
 - Implement feature flags for each feature and dynamically adjust frontend accordingly
@@ -50,6 +98,10 @@ This API runs on FastAPI. Documentation on FastAPI can be found [here](https://d
 #### LevelUserService
 - Reward at specific levels
 - Achievements at specific levels
+
+#### Users
+- More data collection when creating a user
+- Tracking sessionIds for a game session
 
 ## Contributions
 Please feel free to contribute to this project by either submitting an issue or opening a pull request. All contributions

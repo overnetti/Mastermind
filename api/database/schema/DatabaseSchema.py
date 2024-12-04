@@ -7,7 +7,7 @@ from fastapi import HTTPException
 import traceback
 import logging
 
-databaseURL = "sqlite+aiosqlite:///./database/Mastermind.db"
+databaseURL = "sqlite+aiosqlite:///../Mastermind.db"
 engine = create_async_engine(databaseURL, echo=True)
 sessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 Base = declarative_base()
