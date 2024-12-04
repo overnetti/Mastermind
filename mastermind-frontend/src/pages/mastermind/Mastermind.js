@@ -61,7 +61,7 @@ const Mastermind = () => {
           }
 
           const result = await response.json();
-
+          
           if (result.status === "won" || result.status === "lost") {
               navigate("/game-over", { state: { userId: result.userId, status: result.status } });
           } else {
