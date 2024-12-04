@@ -25,7 +25,7 @@ The game also includes the following additional features:
   - Win rate
 
 ## Getting Started
-Before beginning, make sure you have Node.js, React, Python3.12 installed
+Before beginning, make sure you have [NodeJS](https://nodejs.org/en) and [Python3.12](https://www.python.org/downloads/release/python-3120/) installed.
 
 1. Clone the repository
    - Clone the following repo to your machine:
@@ -43,15 +43,14 @@ Before beginning, make sure you have Node.js, React, Python3.12 installed
    - For the database, ensure you have a SQL database viewer on your machine (e.g. [DBeaver](https://dbeaver.io/download/), [MySQL Workbench](https://dev.mysql.com/downloads/workbench/), [DB Browser for SQL Lite](https://sqlitebrowser.org/dl/), etc.)
 
 ### Running the Application
-To run the frontend (Note that the frontend will run on port 3000):
+#### Frontend (port 3000)
    - Navigate to the `mastermind-frontend` folder:
      - `cd mastermind-frontend`
    - Run the following command:
      - `npm start`
-To run the backend (Note that the backend will run on port 5000):
-   - Navigate to the root directory of the project:
-     - `cd ..`
-   - And run:
+
+#### Backend (port 5000)
+   - Navigate to the root directory of the project and run:
      - `python3.12 -m api.app`
 
 ## API
@@ -77,10 +76,18 @@ This API runs on FastAPI. Documentation on FastAPI can be found [here](https://d
 ![Database Schema](assets/MastermindDatabaseSchema.svg)
 
 ## Technologies, Code Structure, and Thought Process
-### Technologies
-- React
-- FastAPI
-- SQL
+### Technologies with Documentation
+- [NodeJS](https://nodejs.org/api/index.html)
+- [React](https://react.dev/learn)
+- [FastAPI](https://devdocs.io/fastapi/)
+- [SQLite](https://www.sqlite.org/quickstart.html)
+- [SQLAlchemy](https://docs.sqlalchemy.org/en/20/tutorial/index.html)
+- [AioSQLite](https://aiosqlite.omnilib.dev/en/stable/) 
+- [Requests](https://requests.readthedocs.io/en/latest/)
+- [Pydantic](https://docs.pydantic.dev/latest/)
+- [greenlet](https://greenlet.readthedocs.io/en/latest/)
+- [Passlib](https://passlib.readthedocs.io)
+- [Bcrypt](https://www.geeksforgeeks.org/hashing-passwords-in-python-with-bcrypt/)
 
 ### Code Structure
 
@@ -88,7 +95,7 @@ This API runs on FastAPI. Documentation on FastAPI can be found [here](https://d
 
 ## Future Implementations
 ### Server
-- Decoupling database logic from service code so that it is run via the endpoint instead
+- Implement controllers to call business and DB logic functions within endpoints
 - User authentication and authorization using JWT tokens, so sessions expire after a certain amount of time
 - Further testing on PlayMastermindGameService and corresponding features
 - Implement feature flags for each feature and dynamically adjust frontend accordingly

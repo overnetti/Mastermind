@@ -17,7 +17,6 @@ const GameOver = () => {
                 });
                 const result = await response.json();
                 setPlayerData(result);
-                console.log("PLAYER DATA: ", result);
             } catch (error) {
                 console.error('Error fetching player data: ', error.message);
             }

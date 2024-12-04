@@ -110,7 +110,6 @@ class Mastermind:
             logging.error(f"Error submitting guess: {traceback.format_exc()}")
             raise HTTPException(status_code=400, detail=str(e))
 
-        # todo: remove winning number when ready
         roundData = JSONResponse(content={
             "userId": self.player.userId,
             "status": self.status,
@@ -121,7 +120,6 @@ class Mastermind:
             "totalRounds": self.totalRounds,
             "isLastRound": isLastRound,
             "remainingGuesses": self.remainingGuesses,
-            "winnerNumber": self.winningCombo
         })
 
         return roundData
