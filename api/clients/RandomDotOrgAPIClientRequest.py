@@ -14,11 +14,12 @@ class RandomDotOrgAPIClientRequest:
     async def generateWinningCombo(self, inputLength: int, minRandomDigit: int, maxRandomDigit: int) -> str:
         """
         Generates a randomized winning combination based on the game configuration parameters.
-        @param {Int} inputLength - Required length of the combination.
-        @param {Int} minRandomDigit - The minimum valid digit in the combination.
-        @param {Int} maxRandomDigit - The maximum valid digit in the combination.
-        @returns {String} Containing the winning combination.
-        @throws {Error} HTTPException: If an error occurs generating the combination, a 500 error is thrown.
+        :param: {Int} inputLength - Required length of the combination.
+        :param: {Int} minRandomDigit - The minimum valid digit in the combination.
+        :param: {Int} maxRandomDigit - The maximum valid digit in the combination.
+        :return: {String} Containing the winning combination.
+        :raise: {HTTPException}:
+            - 500: If an error occurs generating the combination.
         """
         try:
             randomdotorgResponse = requests.get(self.RandomDotOrgURL,

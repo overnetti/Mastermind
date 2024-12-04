@@ -11,13 +11,13 @@ from api.features.PlayerStats.Services.PlayerStatsManagementService import Playe
 from api.services.PlayMastermindGameMVP.PlayMastermindGameService import Mastermind
 import logging
 import traceback
-import json
 
-
+# Instantiate the FastAPI, a player instance, and an instance of the game.
 app = FastAPI()
 player = PlayerDataManagementService()
 game = Mastermind(player)
 
+# Ensure that the API is accessed by only the frontend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -26,18 +26,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Ensure logs are not suppressed by uvicorn and are turned to debug mode.
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger("uvicorn")
-
 logging.getLogger("uvicorn").setLevel(logging.DEBUG)
 logging.getLogger("uvicorn.access").setLevel(logging.DEBUG)
 
 
+# Call the construction of the database tables.
 @app.on_event("startup")
 async def startup():
     await initDB()
 
 
+# FastAPI schema for Body requests in endpoints.
 class Users(BaseModel):
     username: str
     password: str

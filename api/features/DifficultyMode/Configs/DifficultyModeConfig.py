@@ -1,3 +1,6 @@
+"""
+This file contains the configurations for the various difficulty modes.
+"""
 difficulty_modes = {
     "EASY": {
         "GUESS_COUNT": 10,

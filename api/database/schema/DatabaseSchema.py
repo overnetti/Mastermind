@@ -3,6 +3,9 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, String, Text, Integer, Boolean
 import uuid
 from datetime import datetime
+from fastapi import HTTPException
+import traceback
+import logging
 
 databaseURL = "sqlite+aiosqlite:///./database/Mastermind.db"
 engine = create_async_engine(databaseURL, echo=True)
@@ -10,7 +13,7 @@ sessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=F
 Base = declarative_base()
 
 
-# Users table schema
+# Users table schema, where userId is the primary key
 class UsersTable(Base):
     __tablename__ = "Users"
     userId = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
@@ -19,7 +22,7 @@ class UsersTable(Base):
     createdAt = Column(String, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
-# Player stats table schema
+# PlayerStats table schema, where userId is the primary key
 class PlayerStatsTable(Base):
     __tablename__="PlayerStats"
     userId = Column(String, primary_key=True, index=True)
@@ -31,7 +34,7 @@ class PlayerStatsTable(Base):
     gamesPlayed = Column(Integer, default=0)
     winRate = Column(Integer, default=0.0)
 
-
+# FeatureFlag table schema, where id is the primary key
 class FeatureFlag(Base):
     __tablename__="FeatureFlags"
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
@@ -42,5 +45,15 @@ class FeatureFlag(Base):
 
 
 async def initDB():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    """
+    Creates the database tables if they don't already exist.
+    :return: None.
+    :raise: {HTTPException}:
+        - 500: If an error occurs creating the database tables.
+    """
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        logging.error(f"Error creating database tables: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=str(e))
