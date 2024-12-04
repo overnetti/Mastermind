@@ -39,7 +39,7 @@ Before beginning, ensure you have [NodeJS](https://nodejs.org/en) and [Python3.1
    - For the backend, change directories to the `api` folder:
      - `cd ../api` 
    - And run:
-     - `pip install -r requirements.txt`
+     - `python3.12 -m pip install -r requirements.txt`
    - For the database, ensure you have a SQL database viewer on your machine (e.g. [DBeaver](https://dbeaver.io/download/), [MySQL Workbench](https://dev.mysql.com/downloads/workbench/), [DB Browser for SQL Lite](https://sqlitebrowser.org/dl/), etc.)
 
 ### Running the Application
@@ -90,8 +90,8 @@ This API runs on FastAPI. Documentation on FastAPI can be found [here](https://d
 | POST   | /reset               | None                                                   | N/A      | JSONResponse<br/>  ```content="Game and player have reset."```                                                                                                                                                                                            | Resets both in-memory player instance and game instance for fresh login.                                                                  |
 
 ### Sequence Diagram
-This sequence diagram starts with the POST /enter-game request, followed by a POST /submit-guess of an incorrect guess. The user then wins on the second POST /submit-guess and the sequence diagram showcases the data traversal across services to update the stats before finally saving to the database.
-![APISequenceDiagram](assets/MastermindAPISequenceDiagram.svg)
+This sequence diagram starts with the POST /enter-game request, followed by a POST /submit-guess of an incorrect guess. The user then wins on the second POST /submit-guess and the sequence diagram showcases the data traversal across services to update the stats before finally saving to the database.<br/>
+![APISequenceDiagram](assets/MastermindAPISeqDiagram.svg)
 (Please right-click and open the image in a new tab for greater readability)
 
 ## Database
